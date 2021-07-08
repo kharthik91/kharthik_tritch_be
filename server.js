@@ -3,8 +3,8 @@ require('dotenv').config()
 const express = require('express')
 const mongoose = require('mongoose')
 const cors = require('cors')
-const animalRouter = require('./routers/animal_router')
-const userRouter = require('./routers/user_router')
+// const animalRouter = require('./routers/animal_router')
+// const userRouter = require('./routers/user_router')
 
 const app = express();
 const port = process.env.PORT || 3000
@@ -29,9 +29,9 @@ app.use(express.urlencoded({ extended: true }))
 
 // ---- ROUTES ----
 
-app.use('/api/v1/itineraries', itinerary_router)
-app.use('/api/v1/users', user_router)
-app.use('/api/v1/comments', user_router)
+// app.use('/api/v1/itineraries', itinerary_router)
+// app.use('/api/v1/users', user_router)
+// app.use('/api/v1/comments', user_router)
 
 mongoose.connect( mongoURI, { useNewUrlParser: true, useUnifiedTopology: true } )
   .then(response => {
