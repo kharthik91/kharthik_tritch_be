@@ -1,8 +1,0 @@
-DB_HOST=cluster0.qij3j.mongodb.net
-DB_USER=quotr
-DB_PASS=EMNwHKt7eMxQxYpM
-DB_NAME=animal_shelter
-PORT=8000
-
-JWT_SECRET=";NZi?H:/hXh7!T%-B~Ks-^E47"~YpA"
-
