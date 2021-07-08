@@ -29,7 +29,7 @@ app.use(express.urlencoded({ extended: true }));
 // ---- ROUTES ----
 
 // app.use("/api/v1/itineraries", itinerary_router);
-// app.use("/api/v1/users", userRouter);
+app.use("/api/v1/users", userRouter);
 // app.use("/api/v1/comments", user_router);
 
 mongoose
