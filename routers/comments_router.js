@@ -3,11 +3,8 @@ const router = express.Router();
 const commentsController = require('../controllers/comments_controller');
 
 
-//index route 
+//route to get comments by itnerary
 router.get('/:itnerary_id', commentsController.index);
-
-//show route 
-router.get('/:id', commentsController.show);
 
 //create route 
 router.post('/new', commentsController.create);

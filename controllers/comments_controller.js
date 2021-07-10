@@ -5,25 +5,13 @@ const { CommentsModel } = require('../models/comments_model')
 
 module.exports= {
 
-// Get all comments
+// Get all comments by itineray
 index: (req, res) => {
     CommentsModel.find({}, (err, data) => {
         if(!err) {
             res.send(data);
         } else {
             console.log(err);
-        }
-    });
-},
-
-// Get one comment
-
-show: (req, res) => {
-    CommentsModel.findById(req.params.id, (err, data) => {
-        if(!err) {
-            res.send(data);
-        } else {
-           console.log(err);
         }
     });
 },
