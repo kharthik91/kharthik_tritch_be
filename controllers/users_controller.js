@@ -5,21 +5,21 @@ const moment = require("moment");
 
 const { UserModel } = require("../models/users_model");
 const {
-  registerValidation,
-  loginValidation,
+  registerValidator,
+  loginValidator,
 } = require("../validations/users_validations");
 
 module.exports = {
   register: async (req, res) => {
     // validate user form input
-    const validationResult = registerValidation.validate(req.body);
+    const validationResult = registerValidator.validate(req.body);
 
     if (validationResult.error) {
       res.statusCode = 400;
       return res.json(validationResult.error);
     }
 
-    const validatedParams = validationResult.validationResult;
+    const validatedParams = validationResult.value;
 
     // ensure pw and confirmPw is the same
     if (validatedParams.password !== validatedParams.confirmPassword) {
@@ -32,7 +32,6 @@ module.exports = {
 
     try {
       user = await UserModel.findOne({
-        username: validatedParams.username,
         email: validatedParams.email,
       });
     } catch (err) {
@@ -63,7 +62,8 @@ module.exports = {
     // create user
     try {
       user = await UserModel.create({
-        username: validatedParams.username,
+        firstName: validatedParams.firstName,
+        lastName: validatedParams.lastName,
         email: validatedParams.email,
         hash: hash,
       });
@@ -79,7 +79,7 @@ module.exports = {
 
   login: async (req, res) => {
     // validate user input
-    const validationResult = loginValidation.validate(req.body);
+    const validationResult = loginValidator.validate(req.body);
 
     if (validationResult.error) {
       res.statusCode = 400;
@@ -91,7 +91,7 @@ module.exports = {
     // ensure that user exists
     let user = null;
     try {
-      user = await UserModel.findOne({ username: validatedParams.username });
+      user = await UserModel.findOne({ email: validatedParams.email });
     } catch (err) {
       res.statusCode = 500;
       return res.json(err);
@@ -126,7 +126,29 @@ module.exports = {
       });
     }
 
-    // crate a token with an expiry date
+    // create a token with an expiry date
     let tokenExpiry = moment().add(1, "hour").toString();
+    console.log(tokenExpiry);
+
+    const token = jwt.sign(
+      {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "3 days",
+      }
+    );
+
+    res.json({
+      token: token,
+      expiresAt: tokenExpiry,
+    });
+  },
+
+  edit: (req, res) => {
+    // validate user input
   },
 };
