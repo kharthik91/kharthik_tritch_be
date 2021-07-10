@@ -70,7 +70,7 @@ module.exports = {
         const validatedParams = validationResult.value
 
         let page = 0
-        let perPage = 20
+        let perPage = 22
 
         if (validatedParams.page && validatedParams.per_page) {
             let page = validatedParams.page
