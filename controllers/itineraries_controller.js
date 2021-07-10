@@ -1,11 +1,116 @@
 const _ = require('lodash')
 const mongoose = require('mongoose')
-const {itineraryModel} = require('../models/animal')
-// const {animalValidator, listAnimalValidator} = require('../validations/animals_validators')
+const {ItinerariesModel} = require('../models/itineraries_model')
+const {listAllValidator} = require('../validations/itineraries_validations')
 const jwt = require('jsonwebtoken')
 const moment = require('moment')
 
 module.exports = {
+
+    listAll: async (req, res) => {
+        // validate request query params
+        const validationResult = listAllValidator.validate(req.query)
+        if (validationResult.error) {
+            res.statusCode = 400
+            return res.json(validationResult.err)
+        }
+
+        const validatedParams = validationResult.value
+
+        let page = 0
+        let perPage = 20
+
+        if (validatedParams.page && validatedParams.per_page) {
+            let page = validatedParams.page
+            let perPage = validatedParams.per_page
+        }
+
+        // building up filter to query the database
+        let filters = {}
+        if (validatedParams.season ) {
+            filters.season = validatedParams.season
+        }
+        if (validatedParams.trip_duration) {
+            filters.trip_duration = validatedParams.trip_duration
+        }
+        if (validatedParams.destination) {
+            filters.destination = validatedParams.destination
+        }
+
+        // determinining total number of docs in DB that satisfies the filters
+        let totalCount = 0
+        try {
+            totalCount = await ItinerariesModel.countDocuments(filters)
+        } catch (err) {
+            res.statusCode = 500
+            return res.json("nothing to see here")
+        }
+
+        // retrieving paginated data based on the filters
+        ItinerariesModel.find(filters).skip(perPage * page).limit(perPage)
+            .then(response => {
+                return res.json({
+                    itineraries: response,
+                    totalCount: totalCount
+                })
+            })
+            .catch(err => {
+                return res.json(err)
+            })
+    },
+
+    listOwner: async (req, res) => {
+        // validate request query params
+        const validationResult = listAllValidator.validate(req.query)
+        if (validationResult.error) {
+            res.statusCode = 400
+            return res.json(validationResult.err)
+        }
+
+        const validatedParams = validationResult.value
+
+        let page = 0
+        let perPage = 20
+
+        if (validatedParams.page && validatedParams.per_page) {
+            let page = validatedParams.page
+            let perPage = validatedParams.per_page
+        }
+
+        // building up filter to query the database
+        let filters = {}
+        if (validatedParams.season ) {
+            filters.season = validatedParams.season
+        }
+        if (validatedParams.trip_duration) {
+            filters.trip_duration = validatedParams.trip_duration
+        }
+        if (validatedParams.destination) {
+            filters.destination = validatedParams.destination
+        }
+
+        // determinining total number of docs in DB that satisfies the filters
+        let totalCount = 0
+        try {
+            totalCount = await ItinerariesModel.countDocuments(filters)
+        } catch (err) {
+            res.statusCode = 500
+            return res.json("nothing to see here")
+        }
+
+        // retrieving paginated data based on the filters
+        ItinerariesModel.find(filters).skip(perPage * page).limit(perPage)
+            .then(response => {
+                return res.json({
+                    itineraries: response,
+                    totalCount: totalCount
+                })
+            })
+            .catch(err => {
+                return res.json(err)
+            })
+    },
+
 
     create: (req, res) => {
         console.log(req.body)
