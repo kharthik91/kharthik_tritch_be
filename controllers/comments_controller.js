@@ -5,7 +5,7 @@ const { CommentsModel } = require('../models/comments_model')
 
 module.exports= {
 
-// Get all comments by itineray
+// Get all comments
 index: (req, res) => {
     CommentsModel.find({}, (err, data) => {
         if(!err) {
@@ -16,13 +16,27 @@ index: (req, res) => {
     });
 },
 
+// Get one comment
+
+show: (req, res) => {
+    CommentsModel.findById(req.params.id, (err, data) => {
+        if(!err) {
+            res.send(data);
+        } else {
+           console.log(err);
+        }
+    });
+},
+
+
 // create comment
 create: async (req, res) => {
     let cmt = null
     try {
      cmt = await CommentsModel.create({
         comments: req.body.comments,
-    
+        itinerary_id: req.body.itinerary_id,
+        user_id: req.body.user_id
     }); 
     } catch (err) {
         console.log(err);
@@ -31,14 +45,13 @@ create: async (req, res) => {
     console.log(req.body)
     res.statusCode = 200
     return res.json()
-
 },
+
 
 
 // update comment
 
 update: (req, res) => {
-
 
     const cmt = {
         comments: req.body.comments,
@@ -53,6 +66,7 @@ update: (req, res) => {
 },
 
 
+
 // Delete comment
 delete: (req, res) => {
 
@@ -65,6 +79,5 @@ delete: (req, res) => {
         }
     });
 },
-
 
 }
