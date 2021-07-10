@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 // const animalRouter = require('./routers/animal_router')
 const userRouter = require("./routers/users_router");
+const commentsRouter = require("./routers/comments_router")
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -30,7 +31,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // app.use("/api/v1/itineraries", itinerary_router);
 // app.use("/api/v1/users", userRouter);
-// app.use("/api/v1/comments", user_router);
+app.use("/api/v1/comments", commentsRouter);
 
 mongoose
   .connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
