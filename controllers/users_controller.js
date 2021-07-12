@@ -215,33 +215,33 @@ module.exports = {
         updateParams,
         { new: true }
       );
-
-      if (!updatedUser) {
-        res.statusCode = 500;
-        return res.json(`error updating user's particulars`);
-      }
-
-      // use the updated particulars to sign a new jwt token
-      let updatedAccessToken = jwt.sign(
-        updatedUser.email,
-        process.env.JWT_SECRET
-      );
-
-      let updatedRefreshToken = jwt.sign(
-        updatedUser.email,
-        process.env.REFRESH_TOKEN_SECRET
-      );
-
-      res.statusCode = 200;
-      res.json({
-        accessToken: updatedAccessToken,
-        refreshToken: updatedRefreshToken,
-      });
     } catch (err) {
       res.statusCode = 500;
       console.log(err);
       return res.json();
     }
+
+    if (!updatedUser) {
+      res.statusCode = 500;
+      return res.json(`error updating user's particulars`);
+    }
+
+    // use the updated particulars to sign a new jwt token
+    let updatedAccessToken = jwt.sign(
+      updatedUser.email,
+      process.env.JWT_SECRET
+    );
+
+    let updatedRefreshToken = jwt.sign(
+      updatedUser.email,
+      process.env.REFRESH_TOKEN_SECRET
+    );
+
+    res.statusCode = 200;
+    res.json({
+      accessToken: updatedAccessToken,
+      refreshToken: updatedRefreshToken,
+    });
   },
 
   changePassword: async (req, res) => {
@@ -250,7 +250,7 @@ module.exports = {
     let user = null;
 
     try {
-      user = await UserModel.findOne({ _id: req.params.userID });
+      user = await UserModel.findOne({ email: req.params.userID });
     } catch (err) {
       res.statusCode = 500;
       return res.json(err);
@@ -304,7 +304,7 @@ module.exports = {
     try {
       changePasswordResponse = await UserModel.findOneAndUpdate(
         {
-          _id: req.params.userID,
+          email: req.params.email,
         },
         {
           hash: newHash,
