@@ -1,7 +1,7 @@
 const _ = require('lodash')
 const mongoose = require('mongoose')
 const {ItinerariesModel} = require('../models/itineraries_model')
-const {listAllValidator} = require('../validations/itineraries_validations')
+const {listValidator, itinerariesValidator} = require('../validations/itineraries_validations')
 const jwt = require('jsonwebtoken')
 const moment = require('moment')
 
@@ -9,7 +9,7 @@ module.exports = {
 
     listAll: async (req, res) => {
         // validate request query params
-        const validationResult = listAllValidator.validate(req.query)
+        const validationResult = listValidator.validate(req.query)
         if (validationResult.error) {
             res.statusCode = 400
             return res.json(validationResult.err)
@@ -60,8 +60,15 @@ module.exports = {
     },
 
     listOwner: async (req, res) => {
+
+        // validate that the userId is valid 
+        if (!mongoose.Types.ObjectId.isValid(req.params.userid)) {
+            res.statusCode = 400
+            return res.json()
+        }
+
         // validate request query params
-        const validationResult = listAllValidator.validate(req.query)
+        const validationResult = listValidator.validate(req.query)
         if (validationResult.error) {
             res.statusCode = 400
             return res.json(validationResult.err)
@@ -70,7 +77,7 @@ module.exports = {
         const validatedParams = validationResult.value
 
         let page = 0
-        let perPage = 20
+        let perPage = 22
 
         if (validatedParams.page && validatedParams.per_page) {
             let page = validatedParams.page
@@ -88,6 +95,8 @@ module.exports = {
         if (validatedParams.destination) {
             filters.destination = validatedParams.destination
         }
+
+        filters.creator = req.params.userid
 
         // determinining total number of docs in DB that satisfies the filters
         let totalCount = 0
@@ -115,7 +124,7 @@ module.exports = {
     create: (req, res) => {
         console.log(req.body)
         // validation
-        const validationResult = animalValidator.validate(req.body)
+        const validationResult = itinerariesValidator.validate(req.body)
         if (validationResult.error) {
             res.statusCode = 400
             return res.json(validationResult.error)
@@ -123,47 +132,48 @@ module.exports = {
 
         const validatedParams = validationResult.value
 
-         // check if auth_token header is given, if not, return 401 unauthorised
-        if (!req.headers.auth_token) {
-            res.statusCode = 401
-            return res.json()
-        }
+        //  // check if auth_token header is given, if not, return 401 unauthorised
+        // if (!req.headers.auth_token) {
+        //     res.statusCode = 401
+        //     return res.json()
+        // }
 
-         // verify JWT token
-         let decodedJWT = null
-         try {
-             decodedJWT = jwt.verify(req.headers.auth_token, process.env.JWT_SECRET)
-         } catch (err) {
-             res.statusCode = 403
-             return res.json()
-         }
-         if (decodedJWT === null) {
-            res.statusCode = 403
-            return res.json()
-         }
+        //  // verify JWT token
+        //  let decodedJWT = null
+        //  try {
+        //      decodedJWT = jwt.verify(req.headers.auth_token, process.env.JWT_SECRET)
+        //  } catch (err) {
+        //      res.statusCode = 403
+        //      return res.json()
+        //  }
+        //  if (decodedJWT === null) {
+        //     res.statusCode = 403
+        //     return res.json()
+        //  }
 
 
-        return res.json()
+        // return res.json()
 
         let createParams = {
             name: validatedParams.name,
-            species: validatedParams.species,
-            breed: validatedParams.breed,
-            age: validatedParams.age,
-            adopted: validatedParams.adopted,
-            gender: validatedParams.gender
+            destination: validatedParams.destination,
+            season: validatedParams.season,
+            trip_duration: validatedParams.trip_duration,
+            itinerary: validatedParams.itinerary,
+            creator: "60e91dc46bddd93fecb25c6d",
+            published: false
         }
 
-        // check if there is a file upload
-        if (req.file) {
-            createParams.image = req.file.path
-        }
+        // // check if there is a file upload
+        // if (req.file) {
+        //     createParams.image = req.file.path
+        // }
 
-        // create animal in DB
-        AnimalModel.create(createParams)
+        // create 
+        ItinerariesModel.create(createParams)
             .then(response => {
-                res.statusCode = 204
-                return res.json()
+                res.statusCode = 201
+                return res.json("item created")
             })
             .catch(err => {
                 res.statusCode = 500
