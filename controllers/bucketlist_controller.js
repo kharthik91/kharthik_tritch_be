@@ -45,7 +45,7 @@ module.exports = {
     return res.json();
   },
 
-  been_there: async (req, res) => {
+  beenThere: async (req, res) => {
     // allows user to update their bucketlist, 'tick' things off their bucketlist
     // validate that user has auth
     if (!req.headers.auth_token) {
@@ -53,10 +53,34 @@ module.exports = {
       return res.json(`Not authorised`);
     }
 
+    const validationResult = bucketlistValidator.validate(req.body);
+
+    if (validationResult.error) {
+      res.statusCode = 400;
+      return res.json(validationResult.error);
+    }
+
+    const validatedParams = validationResult.value;
+
+    // check for value of been_there
+    let beenThereToggler = false;
+    console.log(beenThereToggler);
+
+    if (!validatedParams.been_there) {
+      beenThereToggler = true;
+    }
+
     let updateResponse = null;
 
     try {
-      updateResponse = await BucketlistModel.findOneAndUpdate({});
+      updateResponse = await BucketlistModel.findOneAndUpdate(
+        {
+          itinerary_id: validatedParams.itinerary_id,
+        },
+        {
+          been_there: beenThereToggler,
+        }
+      );
     } catch (err) {
       res.statusCode = 500;
       return res.json(err);
@@ -75,9 +99,35 @@ module.exports = {
   },
 
   delete: (req, res) => {
+    // remove itinerary from bucketlist
     if (!req.headers.auth_token) {
       res.statusCode = 403;
       return res.json(`Not authorised`);
+    }
+
+    const validationResult = bucketlistValidator.validate(req.body);
+
+    if (validationResult.error) {
+      res.statusCode = 400;
+      return res.json(validationResult.error);
+    }
+
+    const validatedParams = validationResult.value;
+
+    let removeResponse = null;
+
+    try {
+      removeResponse = await BucketlistModel.deleteOne({
+        user_id: validatedParams.user_id,
+      });
+    } catch (err) {
+      res.statusCode = 500;
+      return res.json(err);
+    }
+
+    if (!removeResponse) {
+      res.statusCode = 500;
+      return res.json();
     }
   },
 };

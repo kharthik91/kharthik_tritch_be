@@ -4,6 +4,16 @@ const bucketlistController = require("../controllers/bucketlist_controller");
 
 // ROUTES //
 
-app.post("/addToBucketlist", bucketlistController.addToBucketlist);
+app.post(
+  "/:userID/bucketlist/:itinerayID/add",
+  bucketlistController.addToBucketlist
+);
+
+app.patch("/:userID/bucketlist/:itineraryID", bucketlistController.beenThere);
+
+app.post(
+  "/:userID/bucketlist/:itineraryID/delete",
+  bucketlistController.delete
+);
 
 module.exports = router;

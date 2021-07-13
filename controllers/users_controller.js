@@ -266,7 +266,7 @@ module.exports = {
     // validate that user has auth
     if (!req.headers.auth_token) {
       res.statusCode = 403;
-      return res.json(`Not authorised!!!`);
+      return res.json(`Not authorised!`);
     }
 
     // validate user input to change pw
