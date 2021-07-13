@@ -3,14 +3,14 @@ const router = express.Router()
 const itinerariesController = require('../controllers/itineraries_controller')
 
 
-// index
+// list all itineraries
 router.get('/', itinerariesController.listAll)
 
-// show
-// router.get('/:slug', itineraryController.show)
+// list itineraries by owner
+router.get('/:userid', itinerariesController.listOwner)
 
-// // create
-// router.post('/',itineraryController.create)
+// create
+router.post('/',itinerariesController.create)
 
 // // edit
 // router.get('/:slug/edit', itineraryController.editForm)

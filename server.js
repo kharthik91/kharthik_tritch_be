@@ -1,5 +1,4 @@
 // ---- DEPENDENCIES ----
-
 require('dotenv').config()
 const express = require('express')
 const mongoose = require('mongoose')
@@ -28,8 +27,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ---- ROUTES ----
-
-
 app.use('/api/v1/itineraries', itinerariesRouter)
 app.use("/api/v1/users", userRouter);
 

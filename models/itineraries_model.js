@@ -11,7 +11,7 @@ const itinerariesSchema = new mongoose.Schema ({
     itinerary: [{
         day: { type: Number},
         event_name: { type: String },
-        start_time: {},
+        start_time: { type: Date },
         event_duration: { type: Number},
     }],
     creator: { type: String, required: true},
@@ -23,5 +23,6 @@ const itinerariesSchema = new mongoose.Schema ({
 const ItinerariesModel = mongoose.model('Itinerary', itinerariesSchema)
 
 module.exports = {
-    ItinerariesModel
+    ItinerariesModel,
+    EnumSeasons
 }
