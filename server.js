@@ -5,6 +5,7 @@ const mongoose = require('mongoose')
 const cors = require('cors')
 const itinerariesRouter = require('./routers/itineraries_router')
 const userRouter = require("./routers/users_router");
+const commentsRouter = require("./routers/comments_router")
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -27,9 +28,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ---- ROUTES ----
+
 app.use('/api/v1/itineraries', itinerariesRouter)
 app.use("/api/v1/users", userRouter);
-app.use("/api/v1/users", userRouter2);
+app.use("/api/v1/comments", commentsRouter);
+
 
 mongoose
   .connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
