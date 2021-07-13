@@ -28,7 +28,6 @@ show: (req, res) => {
     });
 },
 
-
 // create comment
 create: async (req, res) => {
     let cmt = null

@@ -3,7 +3,7 @@ const router = express.Router();
 const commentsController = require('../controllers/comments_controller');
 
 
-//index route 
+//shows iternay comment
 router.get('/:itnerary_id', commentsController.index);
 
 //show route 
