@@ -19,11 +19,7 @@ module.exports = {
       res.statusCode = 400;
       return res.json(validationResult.error);
     }
-    // make sure that user making request is authorised
-    if (!req.headers.auth_token) {
-      res.statusCode = 403;
-      return res.json(`Not authorised`);
-    }
+
     // make sure that itinerary is not already on bucketlist
     let bucketlistItem = null;
 
@@ -47,11 +43,6 @@ module.exports = {
 
   beenThere: async (req, res) => {
     // allows user to update their bucketlist, 'tick' things off their bucketlist
-    // validate that user has auth
-    if (!req.headers.auth_token) {
-      res.statusCode = 403;
-      return res.json(`Not authorised`);
-    }
 
     const validationResult = bucketlistValidator.validate(req.body);
 
@@ -100,10 +91,6 @@ module.exports = {
 
   delete: (req, res) => {
     // remove itinerary from bucketlist
-    if (!req.headers.auth_token) {
-      res.statusCode = 403;
-      return res.json(`Not authorised`);
-    }
 
     const validationResult = bucketlistValidator.validate(req.body);
 
