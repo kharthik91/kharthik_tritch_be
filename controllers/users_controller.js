@@ -150,38 +150,6 @@ module.exports = {
 
     let validatedParams = validationResult.value;
 
-    // check if auth_token is present in headers sent from FE
-    if (!req.headers.auth_token) {
-      res.statusCode = 403;
-      return res.json({
-        message: `Unable to authenticate user's access`,
-      });
-    }
-
-    // verify that the auth_token is valid
-    let verifiedToken = null;
-
-    try {
-      verifiedToken = await jwt.verify(
-        req.headers.auth_token,
-        process.env.JWT_SECRET
-      );
-    } catch (err) {
-      console.log(err);
-      res.statusCode = 403;
-      res.json({
-        message: `Unable to authenticate user's access`,
-      });
-    }
-
-    if (verifiedToken === null) {
-      res.statusCode = 403;
-      return res.json({
-        message: `Unable to authenticate user's access`,
-      });
-    }
-
-    // get current user data
     let currentUser = null;
 
     try {
@@ -261,14 +229,6 @@ module.exports = {
       return res.json();
     }
 
-    console.log(user);
-
-    // validate that user has auth
-    if (!req.headers.auth_token) {
-      res.statusCode = 403;
-      return res.json(`Not authorised!`);
-    }
-
     // validate user input to change pw
     const validationResult = changePasswordValidator.validate(req.body);
 
@@ -330,13 +290,15 @@ module.exports = {
       );
     } catch (err) {
       res.statusCode = 500;
-      return res.json(`kekl`);
+      return res.json(TypeError);
     }
 
     if (!newToken || !newRefreshToken) {
       res.statusCode = 500;
-      return res.json(`Error`);
+      return res.json(`Error providing authorisation`);
     }
+
+    res.cookie("jwt");
 
     return res.json({
       accessToken: newToken,
