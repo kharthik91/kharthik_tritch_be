@@ -1,14 +1,14 @@
 const express = require('express')
-const router = express.Router()
 const mongoose = require("mongoose"); 
 const { CommentsModel } = require('../models/comments_model')
-const {commentsValidator} = require('../validations/comments_validations');
+const router = express.Router()
+const {commentsValidator} = require('../validations/comments_validation');
 
 module.exports= {
 
 index: (req, res) => {
         CommentsModel.find({itinerary_id:req.params.itinerary_id})
-        //.populate('users')
+        //.populate('email')
         .then((response) => {
             if (!response) {
                 res.statusCode = 404;
@@ -26,7 +26,7 @@ index: (req, res) => {
 
 show: (req, res) => {
     CommentsModel.find({user_id:req.params.user_id})
-    //.populate('users')
+    .populate('user')
     .then((response) => {
         if (!response) {
             res.statusCode = 404;
@@ -45,7 +45,7 @@ show: (req, res) => {
 // create comment
 create: async (req, res) => {
 
-    //validation
+    // //validation
     const commentsValidatorResult = commentsValidator.validate(req.body);
     if (commentsValidatorResult.error) {
         res.statusCode = 400;
@@ -57,7 +57,8 @@ create: async (req, res) => {
      cmt = await CommentsModel.create({
         comments: req.body.comments,
         itinerary_id: req.params.itinerary_id,
-        user_id: req.params.user_id
+        user_id: req.params.user_id,
+        user: req.params.user_id
     }); 
     } catch (err) {
         console.log(err);
@@ -74,7 +75,7 @@ create: async (req, res) => {
 
 update: (req, res) => {
 
-       //validation
+    //    //validation
        const commentsValidatorResult = commentsValidator.validate(req.body);
        if (commentsValidatorResult.error) {
            res.statusCode = 400;

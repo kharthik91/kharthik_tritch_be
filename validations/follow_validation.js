@@ -5,7 +5,11 @@ const Joi = require("joi");
 
 module.exports = {
     followValidator: Joi.object({
-        comments: Joi.string() .max(200) .required(),
+        userId: Joi.string() .min(3) .max(30) .required(),
+        email: Joi.string() .max(200) .required(),
+        followers: Joi.string(),
+        followings: Joi.string(),
+        
     }),
 
 };

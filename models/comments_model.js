@@ -1,11 +1,11 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+const { UserModel } = require('./users_model') 
+
 
 const CommentsSchema = new mongoose.Schema({
   comments: { type: String, required: true },
-  // users: {
-  //         type: Schema.Types.ObjectId, 
-  //         ref: 'User'},
+  user: { type: Schema.Types.ObjectId, ref: UserModel},
   itinerary_id: {type: String, required: true},
   user_id: {type: String, required: true },
 });

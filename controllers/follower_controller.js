@@ -1,4 +1,3 @@
-const User = require("../models/users_model");
 const mongoose = require("mongoose"); 
 const { FollowModel } = require('../models/follow_model')
 const {followValidator} = require('../validations/follow_validation');
