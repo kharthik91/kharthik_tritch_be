@@ -2,40 +2,62 @@ const express = require('express')
 const router = express.Router()
 const mongoose = require("mongoose"); 
 const { CommentsModel } = require('../models/comments_model')
+const {commentsValidator} = require('../validations/comments_validations');
 
 module.exports= {
 
-// Get all comments
 index: (req, res) => {
-    CommentsModel.find({}, (err, data) => {
-        if(!err) {
-            res.send(data);
-        } else {
+        CommentsModel.find({itinerary_id:req.params.itinerary_id})
+        //.populate('users')
+        .then((response) => {
+            if (!response) {
+                res.statusCode = 404;
+                return res.json();
+            }
+    
+            return res.json(response);
+        })
+        .catch((err) => {
             console.log(err);
-        }
-    });
-},
-
-// Get one comment
+            res.statusCode = 500;
+            return res.json(err);
+        });
+        },
 
 show: (req, res) => {
-    CommentsModel.findById(req.params.id, (err, data) => {
-        if(!err) {
-            res.send(data);
-        } else {
-           console.log(err);
+    CommentsModel.find({user_id:req.params.user_id})
+    //.populate('users')
+    .then((response) => {
+        if (!response) {
+            res.statusCode = 404;
+            return res.json();
         }
+
+        return res.json(response);
+    })
+    .catch((err) => {
+        console.log(err);
+        res.statusCode = 500;
+        return res.json(err);
     });
-},
+    },
 
 // create comment
 create: async (req, res) => {
+
+    //validation
+    const commentsValidatorResult = commentsValidator.validate(req.body);
+    if (commentsValidatorResult.error) {
+        res.statusCode = 400;
+        return res.json(commentsValidatorResult.error);
+    }
+
     let cmt = null
     try {
      cmt = await CommentsModel.create({
         comments: req.body.comments,
-        itinerary_id: req.body.itinerary_id,
-        user_id: req.body.user_id
+        itinerary_id: req.params.itinerary_id,
+        user_id: req.params.user_id
     }); 
     } catch (err) {
         console.log(err);
@@ -52,6 +74,14 @@ create: async (req, res) => {
 
 update: (req, res) => {
 
+       //validation
+       const commentsValidatorResult = commentsValidator.validate(req.body);
+       if (commentsValidatorResult.error) {
+           res.statusCode = 400;
+           return res.json(commentsValidatorResult.error);
+       }
+   
+
     const cmt = {
         comments: req.body.comments,
     };
@@ -65,18 +95,28 @@ update: (req, res) => {
 },
 
 
-
 // Delete comment
 delete: (req, res) => {
 
-    CommentsModel.findByIdAndRemove(req.params.id, (err, data) => {
-        if(!err) {
-            // res.send(data);
-            res.status(200).json({code: 200, message: 'comment deleted', deleteComment: data})
-        } else {
-            console.log(err);
+    CommentsModel.findByIdAndRemove(req.params.id)
+    .then((response) => {
+        if (!response) {
+            res.statusCode = 404;
+            return res.json();
         }
+
+        return res.json(response);
+    })
+    .catch((err) => {
+        console.log(err);
+        res.statusCode = 500;
+        return res.json(err);
     });
-},
+    },
+    
 
 }
+
+
+
+
