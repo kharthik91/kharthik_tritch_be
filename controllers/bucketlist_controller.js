@@ -17,7 +17,7 @@ module.exports = {
 
     if (validationResult.error) {
       res.statusCode = 400;
-      return res.json(validationResult.error);
+      return res.json(validationResult.error.details[0].message);
     }
 
     // make sure that itinerary is not already on bucketlist
@@ -29,12 +29,12 @@ module.exports = {
       });
     } catch (err) {
       res.statusCode = 500;
-      return res.json(500);
+      return res.json(err);
     }
 
     if (bucketlistItem) {
       res.statusCode = 500;
-      return res.json();
+      return res.json(`itineray already on bucketlist`);
     }
 
     res.statusCode = 204;
@@ -48,7 +48,7 @@ module.exports = {
 
     if (validationResult.error) {
       res.statusCode = 400;
-      return res.json(validationResult.error);
+      return res.json(validationResult.error.details[0].message);
     }
 
     const validatedParams = validationResult.value;
@@ -79,14 +79,11 @@ module.exports = {
 
     if (!updateResponse) {
       res.statusCode = 400;
-      return res.json();
+      return res.json(`Error occurred while updating`);
     }
 
     res.statusCode = 204;
-    return res.json({
-      success: true,
-      message: `One step closer to travelling the world!`,
-    });
+    return res.json();
   },
 
   delete: (req, res) => {
@@ -96,7 +93,7 @@ module.exports = {
 
     if (validationResult.error) {
       res.statusCode = 400;
-      return res.json(validationResult.error);
+      return res.json(validationResult.error.details[0].message);
     }
 
     const validatedParams = validationResult.value;
@@ -114,7 +111,11 @@ module.exports = {
 
     if (!removeResponse) {
       res.statusCode = 500;
-      return res.json();
+      return res.json(`Error encountered when deleting`);
     }
+  },
+
+  show: (req, res) => {
+    // allow users to view the bucketlist of a particular user
   },
 };
