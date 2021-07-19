@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const bucketlistController = require("../controllers/bucketlist_controller");
-const { authenticated, unauthenticated } = require("../middlewares/user_auth");
+const { authenticated } = require("../middlewares/user_auth");
 
 // ROUTES //
 

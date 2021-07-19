@@ -24,9 +24,7 @@ module.exports = {
 
     if (!decodedJWT) {
       res.statusCode = 403;
-      return res.json({
-        message: "unable to verify authorisation",
-      });
+      return res.json("unable to verify authorisation");
     }
 
     next();

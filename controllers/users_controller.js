@@ -106,10 +106,7 @@ module.exports = {
 
     if (!user) {
       res.statusCode = 400;
-      return res.json({
-        success: false,
-        message: `Email or password is incorrect!`,
-      });
+      return res.json(`Email or password is incorrect!`);
     }
 
     // ensure user input pw matches saved pw
@@ -140,6 +137,8 @@ module.exports = {
       { email: user.email, userID: user._id },
       process.env.REFRESH_TOKEN_SECRET
     );
+
+    // res.cookie("auth_token", accessToken, { httpOnly: true });
 
     return res.json({
       accessToken: accessToken,
