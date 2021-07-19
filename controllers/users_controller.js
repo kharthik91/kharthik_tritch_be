@@ -303,8 +303,6 @@ module.exports = {
       return res.json(`Error providing authorisation`);
     }
 
-    // res.cookie("jwt");
-
     return res.json({
       accessToken: newToken,
       refreshToken: newRefreshToken,
