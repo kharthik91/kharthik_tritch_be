@@ -15,6 +15,8 @@ create: async (req, res) => {
       return res.json(followValidatorResult.error);
   }
 
+//create user
+
 
   let user = null
   try {

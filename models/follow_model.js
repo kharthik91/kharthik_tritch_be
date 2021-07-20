@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+const { UserModel } = require('./users_model') 
 
 const FollowSchema = new mongoose.Schema(
   {
@@ -8,6 +9,8 @@ const FollowSchema = new mongoose.Schema(
       unique: true,
       require: true,
     },
+    user: { type: Schema.Types.ObjectId, ref: UserModel},
+    
     email: {
       type: String,
       unique: true,

@@ -6,7 +6,7 @@ const {commentsValidator} = require('../validations/comments_validation');
 
 module.exports= {
 
-index: (req, res) => {
+    showitinerarycomments: (req, res) => {
         CommentsModel.find({itinerary_id:req.params.itinerary_id})
         //.populate('email')
         .then((response) => {
@@ -24,8 +24,9 @@ index: (req, res) => {
         });
         },
 
-show: (req, res) => {
-    CommentsModel.find({user_id:req.params.user_id})
+showusercomments: async (req, res) => {
+    try{
+   await CommentsModel.find({user_id:req.params.user_id})
     .populate('user')
     .then((response) => {
         if (!response) {
@@ -34,13 +35,12 @@ show: (req, res) => {
         }
 
         return res.json(response);
-    })
-    .catch((err) => {
+    })}
+    catch (err) {
         console.log(err);
         res.statusCode = 500;
         return res.json(err);
-    });
-    },
+    }},
 
 // create comment
 create: async (req, res) => {
@@ -58,7 +58,8 @@ create: async (req, res) => {
         comments: req.body.comments,
         itinerary_id: req.params.itinerary_id,
         user_id: req.params.user_id,
-        user: req.params.user_id
+        user: req.params.user_id,
+        iitinerary: req.params.user_id
     }); 
     } catch (err) {
         console.log(err);
