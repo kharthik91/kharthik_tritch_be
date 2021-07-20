@@ -3,15 +3,15 @@ const router = express.Router();
 const followerController = require('../controllers/follower_controller');
 
 //create user
-router.post('/register', followerController.create);
+router.post('/:id', followerController.create);
 
 //get a user
-router.get('/:id', followerController.show);
+router.get('/:id', followerController.showfollowers);
 
 //follow a user
-router.put('/:id/follow', followerController.follow);
+//router.put('/:id/follow', followerController.follow);
 
 //unfollow a user
-router.put('/:id/unfollow', followerController.unfollow);
+//router.put('/:id/unfollow', followerController.unfollow);
 
 module.exports = router; 

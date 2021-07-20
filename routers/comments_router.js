@@ -3,13 +3,13 @@ const router = express.Router();
 const commentsController = require('../controllers/comments_controller');
 
 //shows iternay comment
-router.get('/itnerary/:itnerary_id', commentsController.showitinerarycomments);
+router.get('/itnerary/:itineraries', commentsController.showitinerarycomments);
 
 //show route for comments
-router.get('/:user_id', commentsController.showusercomments);
+router.get('/:user', commentsController.showusercomments);
 
 //create route 
-router.post('/:user_id/itinerary/:itinerary_id/new', commentsController.create);
+router.post('/:user/itinerary/:itineraries/new', commentsController.create);
 
 //update
 router.put('/:id', commentsController.update);

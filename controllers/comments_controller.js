@@ -1,124 +1,138 @@
-const express = require('express')
-const mongoose = require("mongoose"); 
-const { CommentsModel } = require('../models/comments_model')
-const router = express.Router()
-const {commentsValidator} = require('../validations/comments_validation');
+const express = require("express");
+const mongoose = require("mongoose");
+const { CommentsModel } = require("../models/comments_model");
+const router = express.Router();
+const { commentsValidator } = require("../validations/comments_validation");
 
-module.exports= {
+module.exports = {
+    //show comments under itineray
+  showitinerarycomments: (req, res) => {
+    if (!mongoose.Types.ObjectId.isValid(req.params.itineraries)) {
+      res.statusCode = 400;
+      return res.json();
+    }
 
-    showitinerarycomments: (req, res) => {
-        CommentsModel.find({itinerary_id:req.params.itinerary_id})
-        //.populate('email')
-        .then((response) => {
-            if (!response) {
-                res.statusCode = 404;
-                return res.json();
-            }
-    
-            return res.json(response);
-        })
-        .catch((err) => {
-            console.log(err);
-            res.statusCode = 500;
-            return res.json(err);
-        });
-        },
-
-showusercomments: async (req, res) => {
-    try{
-   await CommentsModel.find({user_id:req.params.user_id})
-    .populate('user')
-    .then((response) => {
+    CommentsModel.find({ itineraries: req.params.itineraries })
+      .populate("itineraries")
+      .then((response) => {
         if (!response) {
-            res.statusCode = 404;
-            return res.json();
+          res.statusCode = 404;
+          return res.json();
         }
 
         return res.json(response);
-    })}
-    catch (err) {
+      })
+      .catch((err) => {
         console.log(err);
         res.statusCode = 500;
         return res.json(err);
-    }},
+      });
+  },
+//show comments under user
+  showusercomments: (req, res) => {
+    if (!mongoose.Types.ObjectId.isValid(req.params.user)) {
+      res.statusCode = 400;
+      console.log();
+      return res.json();
+    }
 
-// create comment
-create: async (req, res) => {
+    CommentsModel.find({ user: req.params.user })
+      .populate("user")
+      .then((response) => {
+        if (!response) {
+          res.statusCode = 404;
+          return res.json();
+        }
 
-    // //validation
+        return res.json(response);
+      })
+      .catch((err) => {
+        console.log(err);
+        res.statusCode = 500;
+        return res.json(err);
+      });
+  },
+
+  // create comment
+  create: async (req, res) => {
+    //validation
     const commentsValidatorResult = commentsValidator.validate(req.body);
     if (commentsValidatorResult.error) {
-        res.statusCode = 400;
-        return res.json(commentsValidatorResult.error);
+      res.statusCode = 400;
+      return res.json(commentsValidatorResult.error);
     }
 
-    let cmt = null
+    let cmt = null;
     try {
-     cmt = await CommentsModel.create({
+      cmt = await CommentsModel.create({
         comments: req.body.comments,
-        itinerary_id: req.params.itinerary_id,
-        user_id: req.params.user_id,
-        user: req.params.user_id,
-        iitinerary: req.params.user_id
-    }); 
+        user: req.params.user,
+        itineraries: req.params.itineraries,
+      });
     } catch (err) {
-        console.log(err);
-        return res.json()
+      console.log(err);
+      return res.json();
     }
-    console.log(req.body)
-    res.statusCode = 200
-    return res.json()
-},
+    console.log(req.body);
+    res.statusCode = 200;
+    return res.json();
+  },
 
+  // update comment
+  update: async (req, res) => {
+    //validation
+    const commentsValidatorResult = commentsValidator.validate(req.body);
+    if (commentsValidatorResult.error) {
+      res.statusCode = 400;
+      return res.json(commentsValidatorResult.error);
+    }
+    const validatedParams = commentsValidatorResult.value;
 
+    let cmt = null;
 
-// update comment
+    try {
+      cmt = await CommentsModel.findOne({ _id: req.params.id });
+    } catch (err) {
+      res.statusCode = 500;
+      return res.json(err);
+    }
+    if (!cmt) {
+      res.statusCode = 404;
+      return res.json();
+    }
+    try {
+      await cmt.updateOne(validatedParams);
+    } catch (err) {
+      res.statusCode = 500;
+      return res.json();
+    }
+    return res.json();
+  },
 
-update: (req, res) => {
+  // Delete comment
+  delete: async (req, res) => {
+    let cmt = null;
 
-    //    //validation
-       const commentsValidatorResult = commentsValidator.validate(req.body);
-       if (commentsValidatorResult.error) {
-           res.statusCode = 400;
-           return res.json(commentsValidatorResult.error);
-       }
-   
+    // check if comment exists
+    try {
+      cmt = await CommentsModel.findOne({ _id: req.params.id });
+    } catch (err) {
+      res.statusCode = 500;
+      return res.json(err);
+    }
+    if (!cmt) {
+      res.statusCode = 404;
+      return res.json();
+    }
 
-    const cmt = {
-        comments: req.body.comments,
-    };
-    CommentsModel.findByIdAndUpdate(req.params.id, { $set: cmt }, { new: true }, (err, data) => {
-        if(!err) {
-            res.status(200).json({code: 200, message: 'comment updated', updateComment: data})
-        } else {
-            console.log(err);
-        }
-    });
-},
+    try {
+      await CommentsModel.deleteOne({ _id: req.params.id });
+    } catch (err) {
+      console.log(err);
+      res.statusCode = 500;
+      return res.json(err);
+    }
 
-
-// Delete comment
-delete: (req, res) => {
-
-    CommentsModel.findByIdAndRemove(req.params.id)
-    .then((response) => {
-        if (!response) {
-            res.statusCode = 404;
-            return res.json();
-        }
-
-        return res.json(response);
-    })
-    .catch((err) => {
-        console.log(err);
-        res.statusCode = 500;
-        return res.json(err);
-    });
-    },
-    
-
-}
-
-
-
-
+    return res.json();
+  },
+};

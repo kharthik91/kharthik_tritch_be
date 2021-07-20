@@ -4,27 +4,8 @@ const { UserModel } = require('./users_model')
 
 const FollowSchema = new mongoose.Schema(
   {
-    userId: {
-      type: String,
-      unique: true,
-      require: true,
-    },
-    user: { type: Schema.Types.ObjectId, ref: UserModel},
-    
-    email: {
-      type: String,
-      unique: true,
-      require: true,
-    },
-    followers: {
-      type: Array,
-      default: [],
-    },
-    followings: {
-      type: Array,
-      default: [],
-    },
-  
+    follow: { type: String, required: true },
+    user: { type: Schema.Types.ObjectId, ref: UserModel,},
   });
 
 const FollowModel = mongoose.model("follow", FollowSchema);
