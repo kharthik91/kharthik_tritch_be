@@ -41,6 +41,7 @@ module.exports = {
         editors: Joi.array().items(Joi.string()),
         published: Joi.boolean()
             .required()
-    })
+    }),
+
 
 }

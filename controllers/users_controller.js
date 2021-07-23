@@ -16,7 +16,7 @@ module.exports = {
 
     if (validationResult.error) {
       res.statusCode = 400;
-      return res.json(validationResult.error);
+      return res.json(validationResult.error.details[0].message);
     }
 
     const validatedParams = validationResult.value;
