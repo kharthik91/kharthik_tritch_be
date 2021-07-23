@@ -17,13 +17,9 @@ module.exports = {
 
     if (validationResult.error) {
       res.statusCode = 400;
-      return res.json(validationResult.error);
+      return res.json(validationResult.error.details[0].message);
     }
-    // make sure that user making request is authorised
-    if (!req.headers.auth_token) {
-      res.statusCode = 403;
-      return res.json(`Not authorised`);
-    }
+
     // make sure that itinerary is not already on bucketlist
     let bucketlistItem = null;
 
@@ -33,12 +29,12 @@ module.exports = {
       });
     } catch (err) {
       res.statusCode = 500;
-      return res.json(500);
+      return res.json(err);
     }
 
     if (bucketlistItem) {
       res.statusCode = 500;
-      return res.json();
+      return res.json(`itineray already on bucketlist`);
     }
 
     res.statusCode = 204;
@@ -47,17 +43,12 @@ module.exports = {
 
   beenThere: async (req, res) => {
     // allows user to update their bucketlist, 'tick' things off their bucketlist
-    // validate that user has auth
-    if (!req.headers.auth_token) {
-      res.statusCode = 403;
-      return res.json(`Not authorised`);
-    }
 
     const validationResult = bucketlistValidator.validate(req.body);
 
     if (validationResult.error) {
       res.statusCode = 400;
-      return res.json(validationResult.error);
+      return res.json(validationResult.error.details[0].message);
     }
 
     const validatedParams = validationResult.value;
@@ -88,28 +79,21 @@ module.exports = {
 
     if (!updateResponse) {
       res.statusCode = 400;
-      return res.json();
+      return res.json(`Error occurred while updating`);
     }
 
     res.statusCode = 204;
-    return res.json({
-      success: true,
-      message: `One step closer to travelling the world!`,
-    });
+    return res.json();
   },
 
   delete: (req, res) => {
     // remove itinerary from bucketlist
-    if (!req.headers.auth_token) {
-      res.statusCode = 403;
-      return res.json(`Not authorised`);
-    }
 
     const validationResult = bucketlistValidator.validate(req.body);
 
     if (validationResult.error) {
       res.statusCode = 400;
-      return res.json(validationResult.error);
+      return res.json(validationResult.error.details[0].message);
     }
 
     const validatedParams = validationResult.value;
@@ -127,7 +111,11 @@ module.exports = {
 
     if (!removeResponse) {
       res.statusCode = 500;
-      return res.json();
+      return res.json(`Error encountered when deleting`);
     }
+  },
+
+  show: (req, res) => {
+    // allow users to view the bucketlist of a particular user
   },
 };
