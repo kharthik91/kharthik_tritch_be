@@ -124,7 +124,7 @@ module.exports = {
 
     if (!passwordValidated) {
       res.statusCode = 400;
-      res.json(`Email or password is incorrect!`);
+      return res.json(`Email or password is incorrect!`);
     }
 
     // create accessToken & refreshToken for added security
@@ -137,8 +137,6 @@ module.exports = {
       { email: user.email, userID: user._id },
       process.env.REFRESH_TOKEN_SECRET
     );
-
-    // res.cookie("auth_token", accessToken, { httpOnly: true });
 
     return res.json({
       accessToken: accessToken,
