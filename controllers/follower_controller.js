@@ -1,86 +1,87 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const { FollowModel } = require("../models/follow_model");
-const { UserModel } = require("../models/users_model");
+const { commentsValidator } = require("../validations/comments_validation");
 const router = express.Router();
 
 module.exports = {
 
-
-//   // create follower
-//   create: async (req, res) => {
-//     let flw = null;
-//     let flw2 = null;
-//     try {
-//       flw = await FollowModel.create({
-//         user: req.params.user,
-//       });
-
-//       flw2 = await FollowModel.create({
-//         user: req.body.userId,
-//       });
-
-//       let user = await FollowModel.find({user: req.params.user});
-//       let currentUser = await FollowModel.find({user: req.body.userId});
-      
-//         await user.updateOne({ $push: { followers: req.body.userId } });
-//         await currentUser.updateOne({ $push: { followings: req.params.user } });
-//         res.status(200).json("user has been followed");
-     
-//     } catch (err) {
-//       console.log(err);
-//       return res.json();
-//     }
-//     console.log(req.body);
-//     res.statusCode = 200;
-//     return res.json();
-//   },
-// }
-
-
-
-//follow a user
-
-follow: async (req, res) => {
-  if (req.body.userId !== req.params.user) {
-    try {
-      const user = await UserModel.findById(req.params.user);
-      const currentUser = await UserModel.findById(req.body.userId);
-      if (!user.followers.includes(req.body.userId)) {
-        await user.updateOne({ $push: { followers: req.body.userId } });
-        await currentUser.updateOne({ $push: { followings: req.params.user } });
-        res.status(200).json("user has been followed");
-      } else {
-        res.status(403).json("you already follow this user");
-      }
-    } catch (err) {
-      res.status(500).json(err);
+  //show comments under user
+  show: (req, res) => {
+    if (!mongoose.Types.ObjectId.isValid(req.params.user)) {
+      res.statusCode = 400;
+      console.log();
+      return res.json();
     }
-  } else {
-    res.status(403).json("you cant follow yourself");
-  }
-},
+
+    FollowModel.find({ user: req.params.user })
+      .populate("user")
+      .then((response) => {
+        if (!response) {
+          res.statusCode = 404;
+          return res.json();
+        }
+
+        return res.json(response);
+      })
+      .catch((err) => {
+        console.log(err);
+        res.statusCode = 500;
+        return res.json(err);
+      });
+  },
+
+  // follow someone
+  create: async (req, res) => {
+    //validation
+    const followValidatorResult = followValidator.validate(req.body);
+    if (followValidatorResult.error) {
+      res.statusCode = 400;
+      return res.json(followValidatorResult.error);
+    }
+
+    let flw = null;
+    try {
+      flw = await FollowModel.create({
+        following: req.body.following,
+        user: req.params.user,
+      });
+    } catch (err) {
+      console.log(err);
+      return res.json();
+    }
+    console.log(req.body);
+    res.statusCode = 200;
+    return res.json();
+  },
+
+ 
+
+  // remove follower
+  delete: async (req, res) => {
+    let flw = null;
+
+    // check if comment exists
+    try {
+      flw = await FollowModel.findOne({ _id: req.params.id });
+    } catch (err) {
+      res.statusCode = 500;
+      return res.json(err);
+    }
+    if (!flw) {
+      res.statusCode = 404;
+      return res.json();
+    }
+
+    try {
+      await FollowModel.deleteOne({ _id: req.params.id });
+    } catch (err) {
+      console.log(err);
+      res.statusCode = 500;
+      return res.json(err);
+    }
+
+    return res.json();
+  },
 }
 
-// //unfollow a user
-
-// unfollow: async (req, res) => {
-//     if (req.body.userId !== req.params.id) {
-//       try {
-//         const user = await FollowModel.findById(req.params.id);
-//         const currentUser = await FollowModel.findById(req.body.userId);
-//         if (user.followers.includes(req.body.userId)) {
-//           await user.updateOne({ $pull: { followers: req.body.userId } });
-//           await currentUser.updateOne({ $pull: { followings: req.params.id } });
-//           res.status(200).json("user has been unfollowed");
-//         } else {
-//           res.status(403).json("you dont follow this user");
-//         }
-//       } catch (err) {
-//         res.status(500).json(err);
-//       }
-//     } else {
-//       res.status(403).json("you cant unfollow yourself");
-//     }
-//   },
-// }

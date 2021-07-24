@@ -2,11 +2,14 @@ const express = require("express");
 const router = express.Router();
 const followerController = require('../controllers/follower_controller');
 
-//get a user
-//router.get('/:user/check', followerController.show);
+//get followings users
+router.get('/:user', followerController.show);
 
+//create route 
+router.post('/:user/follow', followerController.create);
 
-router.patch('/:user/follow', followerController.follow);
+//delete
+router.delete('/:user/unfollow', followerController.delete);
 
 
 
