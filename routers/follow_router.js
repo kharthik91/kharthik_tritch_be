@@ -6,7 +6,7 @@ const followerController = require('../controllers/follower_controller');
 //router.get('/:user/check', followerController.show);
 
 
-router.post('/:user', followerController.create);
+router.patch('/:user/follow', followerController.follow);
 
 
 

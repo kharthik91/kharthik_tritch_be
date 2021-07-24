@@ -7,12 +7,8 @@ const cookieParser = require("cookie-parser");
 
 const itinerariesRouter = require("./routers/itineraries_router");
 const userRouter = require("./routers/users_router");
-<<<<<<< HEAD
 const commentsRouter = require("./routers/comments_router")
 const followRouter = require("./routers/follow_router")
-=======
-const commentsRouter = require("./routers/comments_router");
->>>>>>> 3ee249bba3f4b77fcd33b89642acc0ab61102c9a
 
 const app = express();
 const port = process.env.PORT || 3000;
