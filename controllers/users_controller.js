@@ -1,18 +1,20 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const moment = require("moment");
+const _ = require("lodash");
 
 const { UserModel } = require("../models/users_model");
 const {
-  registerValidator,
+  schemaValidator,
   loginValidator,
+  updateSchemaValidator,
+  changePasswordValidator,
 } = require("../validations/users_validations");
 
 module.exports = {
   register: async (req, res) => {
     // validate user form input
-    const validationResult = registerValidator.validate(req.body);
+    const validationResult = schemaValidator.validate(req.body);
 
     if (validationResult.error) {
       res.statusCode = 400;
@@ -24,7 +26,7 @@ module.exports = {
     // ensure pw and confirmPw is the same
     if (validatedParams.password !== validatedParams.confirmPassword) {
       res.statusCode = 400;
-      return res.json(`Fat fingers alert!!`);
+      return res.json(`Passwords should match`);
     }
 
     // ensure that user does not already exist
@@ -41,7 +43,7 @@ module.exports = {
 
     if (user) {
       res.statusCode = 409;
-      return res.json();
+      return res.json(`email already exists`);
     }
 
     // convert password to a hash value
@@ -51,12 +53,12 @@ module.exports = {
       hash = await bcrypt.hash(validatedParams.password, 10);
     } catch (err) {
       res.statusCode = 500;
-      return res.json();
+      return res.json(err);
     }
 
     if (hash === "") {
       res.statusCode = 500;
-      return res.json();
+      return res.json(`server error`);
     }
 
     // create user
@@ -67,14 +69,19 @@ module.exports = {
         email: validatedParams.email,
         hash: hash,
       });
-
-      res.statusCode = 201;
-      return res.json(user._id);
     } catch (err) {
       console.log(err);
       res.statusCode = 500;
       return res.json(err);
     }
+
+    if (!user) {
+      res.statusCode = 500;
+      return res.json(`User not found`);
+    }
+
+    res.statusCode = 201;
+    return res.json(user.email);
   },
 
   login: async (req, res) => {
@@ -83,7 +90,7 @@ module.exports = {
 
     if (validationResult.error) {
       res.statusCode = 400;
-      return res.json(validationResult.error);
+      return res.json(validationResult.error.details[0].message);
     }
 
     const validatedParams = validationResult.value;
@@ -99,13 +106,10 @@ module.exports = {
 
     if (!user) {
       res.statusCode = 400;
-      return res.json({
-        success: false,
-        message: `Email or password is incorrect!`,
-      });
+      return res.json(`Email or password is incorrect!`);
     }
 
-    // decrypt password and ensure that it matches
+    // ensure user input pw matches saved pw
     let passwordValidated = false;
 
     try {
@@ -120,35 +124,242 @@ module.exports = {
 
     if (!passwordValidated) {
       res.statusCode = 400;
-      res.json({
-        success: false,
-        message: `Email or password is incorrect!`,
-      });
+      res.json(`Email or password is incorrect!`);
     }
 
-    // create a token with an expiry date
-    let tokenExpiry = moment().add(1, "hour").toString();
-    console.log(tokenExpiry);
-
-    const token = jwt.sign(
-      {
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-      },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "3 days",
-      }
+    // create accessToken & refreshToken for added security
+    const accessToken = jwt.sign(
+      { email: user.email, userID: user._id },
+      process.env.JWT_SECRET
     );
 
-    res.json({
-      token: token,
-      expiresAt: tokenExpiry,
+    const refreshToken = jwt.sign(
+      { email: user.email, userID: user._id },
+      process.env.REFRESH_TOKEN_SECRET
+    );
+
+    // res.cookie("auth_token", accessToken, { httpOnly: true });
+
+    return res.json({
+      accessToken: accessToken,
+      refreshToken: refreshToken,
     });
   },
 
-  edit: (req, res) => {
-    // validate user input
+  updateParticulars: async (req, res) => {
+    // validate user input - limited to firstname, lastname, email
+    const validationResult = updateSchemaValidator.validate(req.body);
+
+    if (validationResult.error) {
+      res.statusCode = 400;
+      return res.json(validationResult.error.details[0].message);
+    }
+
+    let validatedParams = validationResult.value;
+
+    let currentUser = null;
+
+    try {
+      currentUser = await UserModel.findOne({ _id: req.params.userID });
+    } catch (err) {
+      res.statusCode = 500;
+      return res.json(err);
+    }
+
+    if (!currentUser) {
+      res.statusCode = 400;
+      return res.json(`User not found`);
+    }
+
+    let updatedUser = null;
+
+    let updateParams = {
+      firstName: validatedParams.firstName,
+      lastName: validatedParams.lastName,
+    };
+
+    if (validatedParams.email !== currentUser.email) {
+      updateParams.email = validatedParams.email;
+    }
+
+    try {
+      updatedUser = await UserModel.findOneAndUpdate(
+        {
+          _id: req.params.userID,
+        },
+        updateParams,
+        { new: true }
+      );
+    } catch (err) {
+      res.statusCode = 500;
+      return res.json(err);
+    }
+
+    if (!updatedUser) {
+      res.statusCode = 500;
+      return res.json(`error updating user's particulars`);
+    }
+
+    // use the updated particulars to sign a new jwt token
+    let updatedAccessToken = jwt.sign(
+      { email: updatedUser.email, userID: updatedUser._id },
+      process.env.JWT_SECRET
+    );
+
+    let updatedRefreshToken = jwt.sign(
+      { email: updatedUser.email, userID: updatedUser._id },
+      process.env.REFRESH_TOKEN_SECRET
+    );
+
+    res.statusCode = 200;
+    return res.json({
+      accessToken: updatedAccessToken,
+      refreshToken: updatedRefreshToken,
+    });
+  },
+
+  changePassword: async (req, res) => {
+    // validate that user exists
+    let user = null;
+
+    try {
+      user = await UserModel.findOne({ email: req.params.userID });
+    } catch (err) {
+      res.statusCode = 500;
+      return res.json(err);
+    }
+
+    if (!user) {
+      res.statusCode = 400;
+      return res.json(`User not found`);
+    }
+
+    // validate user input to change pw
+    const validationResult = changePasswordValidator.validate(req.body);
+
+    if (validationResult.error) {
+      res.statusCode = 400;
+      res.json(validationResult.error.details[0].message);
+    }
+
+    const validatedPasswords = validationResult.value;
+
+    // check that both passwords are the same
+    if (validatedPasswords.password !== validatedPasswords.confirmPassword) {
+      res.statusCode = 400;
+      return res.json(`Passwords should match`);
+    }
+
+    // encrypt password to hash
+    let newHash = "";
+
+    try {
+      newHash = await bcrypt.hash(validatedPasswords.password, 10);
+    } catch (err) {
+      res.statusCode = 500;
+      return res.json(err);
+    }
+
+    if (!newHash) {
+      res.statusCode = 500;
+      return res.json("Server Error");
+    }
+
+    // save new hash in db
+    let changePasswordResponse = null;
+
+    try {
+      changePasswordResponse = await UserModel.findOneAndUpdate(
+        {
+          email: req.params.email,
+        },
+        {
+          hash: newHash,
+        },
+        { new: true }
+      );
+    } catch (err) {
+      res.statusCode = 500;
+      return res.json(err);
+    }
+
+    let newToken,
+      newRefreshToken = null;
+
+    try {
+      newToken = await jwt.sign(user.email, process.env.JWT_SECRET);
+
+      newRefreshToken = await jwt.sign(
+        user.email,
+        process.env.REFRESH_TOKEN_SECRET
+      );
+    } catch (err) {
+      res.statusCode = 500;
+      return res.json(err);
+    }
+
+    if (!newToken || !newRefreshToken) {
+      res.statusCode = 500;
+      return res.json(`Error providing authorisation`);
+    }
+
+    return res.json({
+      accessToken: newToken,
+      refreshToken: newRefreshToken,
+    });
+  },
+
+  logout: (req, res) => {
+    //  clear token from client side
+    res.clearCookie("auth_token");
+    res.statusCode = 204;
+    return res.json();
+  },
+
+  showAll: async (req, res) => {
+    // show all users so that people can see who they can follow
+    // Discover - Users
+    // authenticated users only
+
+    let findUsers = null;
+
+    try {
+      findUsers = await UserModel.find();
+    } catch (err) {
+      res.statusCode = 500;
+      return res.json(err);
+    }
+
+    if (!findUsers) {
+      res.statusCode = 500;
+      return res.json(`Unable to find users`);
+    }
+
+    res.statusCode = 200;
+    return res.json(findUsers);
+  },
+
+  showOne: async (req, res) => {
+    // allow users to aaccess more details about one other user
+    // this should allow us to display the user details, bucketlists, itineraries, who user follows, who follows them
+    // validate the request of the user email - ensure that user is valid
+
+    // ensuring that user exists
+    let verifiedUser = null;
+
+    try {
+      verifiedUser = await UserModel.findOne({ email: req.params.email });
+    } catch (err) {
+      res.statusCode = 500;
+      return res.json(err);
+    }
+
+    if (!verifiedUser) {
+      res.statusCode = 404;
+      return res.json(`unable to find user`);
+    }
+
+    res.statusCode = 200;
+    return res.json(verifiedUser);
   },
 };
