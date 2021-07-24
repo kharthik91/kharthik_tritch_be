@@ -5,8 +5,7 @@ const Joi = require("joi");
 
 module.exports = {
     followValidator: Joi.object({
-        userId: Joi.string() .min(3) .max(30) .required(),
-        following: Joi.string(),
+        following: Joi.string() .max(200) .required(),
         
     }),
 

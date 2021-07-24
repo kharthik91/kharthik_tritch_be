@@ -1,7 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const { FollowModel } = require("../models/follow_model");
-const { commentsValidator } = require("../validations/comments_validation");
+const { followValidator } = require("../validations/follow_validation");
 const router = express.Router();
 
 module.exports = {
