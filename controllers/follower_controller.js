@@ -1,55 +1,59 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const { FollowModel } = require('../models/follow_model')
+const { FollowModel } = require("../models/follow_model");
 const router = express.Router();
-//const {followValidator} = require('../validations/follow_validation');
 
+module.exports = {
+//create user
+//usercreate: async (req, res) => 
 
-module.exports= {
+  // //get a user
+  // show: (req, res) => {
+  //   FollowModel.find({ user: req.params.user })
+  //     .populate("user")
+  //     .then((response) => {
+  //       if (!response) {
+  //         res.statusCode = 404;
+  //         return res.json();
+  //       }
 
+  //       return res.json(response);
+  //     })
+  //     .catch((err) => {
+  //       console.log(err);
+  //       res.statusCode = 500;
+  //       return res.json(err);
+  //     });
+//   },
 
-  showfollowers: (req, res) => {
-    if (!mongoose.Types.ObjectId.isValid(req.params.itineraries)) {
-      res.statusCode = 400;
+  // create follower
+  create: async (req, res) => {
+    let flw = null;
+    let flw2 = null;
+    try {
+      flw = await FollowModel.create({
+        user: req.params.user,
+      });
+
+      flw2 = await FollowModel.create({
+        user: req.body.userId,
+      });
+
+      let user = await FollowModel.find({user: req.params.user});
+      let currentUser = await FollowModel.find({user: req.body.userId});
+      
+        await user.updateOne({ $push: { followers: req.body.userId } });
+        await currentUser.updateOne({ $push: { followings: req.params.user } });
+        res.status(200).json("user has been followed");
+     
+    } catch (err) {
+      console.log(err);
       return res.json();
     }
-
-    CommentsModel.find({ itineraries: req.params.itineraries })
-      .populate("itineraries")
-      .then((response) => {
-        if (!response) {
-          res.statusCode = 404;
-          return res.json();
-        }
-
-        return res.json(response);
-      })
-      .catch((err) => {
-        console.log(err);
-        res.statusCode = 500;
-        return res.json(err);
-      });
-  },
-
-
-
-//create user
-create: async (req, res) => {
-
-  let flw = null;
-  try {
-    flw = await FollowModel.create({
-      follow: req.body.follow,
-      user: req.params.user,
-    });
-  } catch (err) {
-    console.log(err);
+    console.log(req.body);
+    res.statusCode = 200;
     return res.json();
-  }
-  console.log(req.body);
-  res.statusCode = 200;
-  return res.json();
-},
+  },
 }
 
 
@@ -60,106 +64,16 @@ create: async (req, res) => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-//create user
-
-
-//   let user = null
-//   try {
-//    user = await FollowModel.create({
-//     userId: req.body.userId,
-//     email: req.body.email,
-//     followers: req.body.followers,
-//     followings: req.body.followings,
-//   }); 
-//   } catch (err) {
-//       console.log(err);
-//       return res.json()
-//   }
-//   console.log(req.body)
-//   res.statusCode = 200
-//   return res.json()
-// },
-
-
-// //get a user
-// show: (req, res) => {
-//   FollowModel.findById(req.params.id)
-//   .then((response) => {
-//       if (!response) {
-//           res.statusCode = 404;
-//           return res.json();
-//       }
-
-//       return res.json(response);
-//   })
-//   .catch((err) => {
-//       console.log(err);
-//       res.statusCode = 500;
-//       return res.json(err);
-//   });
-//   },
-
-// //follow a user
+//follow a user
 
 // follow: async (req, res) => {
-//   if (req.body.userId !== req.params.id) {
+//   if (req.body.userId !== req.params.user) {
 //     try {
-//       const user = await FollowModel.findById(req.params.id);
+//       const user = await FollowModel.findById(req.params.user);
 //       const currentUser = await FollowModel.findById(req.body.userId);
 //       if (!user.followers.includes(req.body.userId)) {
 //         await user.updateOne({ $push: { followers: req.body.userId } });
-//         await currentUser.updateOne({ $push: { followings: req.params.id } });
+//         await currentUser.updateOne({ $push: { followings: req.params.user } });
 //         res.status(200).json("user has been followed");
 //       } else {
 //         res.status(403).json("you already follow this user");
@@ -194,4 +108,3 @@ create: async (req, res) => {
 //     }
 //   },
 // }
-

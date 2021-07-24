@@ -18,7 +18,7 @@ module.exports = {
 
     if (validationResult.error) {
       res.statusCode = 400;
-      return res.json(validationResult.error);
+      return res.json(validationResult.error.details[0].message);
     }
 
     const validatedParams = validationResult.value;
@@ -26,7 +26,7 @@ module.exports = {
     // ensure pw and confirmPw is the same
     if (validatedParams.password !== validatedParams.confirmPassword) {
       res.statusCode = 400;
-      return res.json(`Fat fingers alert!!`);
+      return res.json(`Passwords should match`);
     }
 
     // ensure that user does not already exist
@@ -43,7 +43,7 @@ module.exports = {
 
     if (user) {
       res.statusCode = 409;
-      return res.json();
+      return res.json(`email already exists`);
     }
 
     // convert password to a hash value
@@ -53,12 +53,12 @@ module.exports = {
       hash = await bcrypt.hash(validatedParams.password, 10);
     } catch (err) {
       res.statusCode = 500;
-      return res.json();
+      return res.json(err);
     }
 
     if (hash === "") {
       res.statusCode = 500;
-      return res.json();
+      return res.json(`server error`);
     }
 
     // create user
@@ -69,14 +69,19 @@ module.exports = {
         email: validatedParams.email,
         hash: hash,
       });
-
-      res.statusCode = 201;
-      return res.json(user._id);
     } catch (err) {
       console.log(err);
       res.statusCode = 500;
       return res.json(err);
     }
+
+    if (!user) {
+      res.statusCode = 500;
+      return res.json(`User not found`);
+    }
+
+    res.statusCode = 201;
+    return res.json(user.email);
   },
 
   login: async (req, res) => {
@@ -85,7 +90,7 @@ module.exports = {
 
     if (validationResult.error) {
       res.statusCode = 400;
-      return res.json(validationResult.error);
+      return res.json(validationResult.error.details[0].message);
     }
 
     const validatedParams = validationResult.value;
@@ -101,10 +106,7 @@ module.exports = {
 
     if (!user) {
       res.statusCode = 400;
-      return res.json({
-        success: false,
-        message: `Email or password is incorrect!`,
-      });
+      return res.json(`Email or password is incorrect!`);
     }
 
     // ensure user input pw matches saved pw
@@ -122,16 +124,21 @@ module.exports = {
 
     if (!passwordValidated) {
       res.statusCode = 400;
-      res.json({
-        success: false,
-        message: `Email or password is incorrect!`,
-      });
+      res.json(`Email or password is incorrect!`);
     }
 
     // create accessToken & refreshToken for added security
-    const accessToken = jwt.sign(user.email, process.env.JWT_SECRET);
+    const accessToken = jwt.sign(
+      { email: user.email, userID: user._id },
+      process.env.JWT_SECRET
+    );
 
-    const refreshToken = jwt.sign(user.email, process.env.REFRESH_TOKEN_SECRET);
+    const refreshToken = jwt.sign(
+      { email: user.email, userID: user._id },
+      process.env.REFRESH_TOKEN_SECRET
+    );
+
+    // res.cookie("auth_token", accessToken, { httpOnly: true });
 
     return res.json({
       accessToken: accessToken,
@@ -145,43 +152,11 @@ module.exports = {
 
     if (validationResult.error) {
       res.statusCode = 400;
-      return res.json(validationResult.error);
+      return res.json(validationResult.error.details[0].message);
     }
 
     let validatedParams = validationResult.value;
 
-    // check if auth_token is present in headers sent from FE
-    if (!req.headers.auth_token) {
-      res.statusCode = 403;
-      return res.json({
-        message: `Unable to authenticate user's access`,
-      });
-    }
-
-    // verify that the auth_token is valid
-    let verifiedToken = null;
-
-    try {
-      verifiedToken = await jwt.verify(
-        req.headers.auth_token,
-        process.env.JWT_SECRET
-      );
-    } catch (err) {
-      console.log(err);
-      res.statusCode = 403;
-      res.json({
-        message: `Unable to authenticate user's access`,
-      });
-    }
-
-    if (verifiedToken === null) {
-      res.statusCode = 403;
-      return res.json({
-        message: `Unable to authenticate user's access`,
-      });
-    }
-
-    // get current user data
     let currentUser = null;
 
     try {
@@ -193,7 +168,7 @@ module.exports = {
 
     if (!currentUser) {
       res.statusCode = 400;
-      return res.json();
+      return res.json(`User not found`);
     }
 
     let updatedUser = null;
@@ -217,8 +192,7 @@ module.exports = {
       );
     } catch (err) {
       res.statusCode = 500;
-      console.log(err);
-      return res.json();
+      return res.json(err);
     }
 
     if (!updatedUser) {
@@ -228,17 +202,17 @@ module.exports = {
 
     // use the updated particulars to sign a new jwt token
     let updatedAccessToken = jwt.sign(
-      updatedUser.email,
+      { email: updatedUser.email, userID: updatedUser._id },
       process.env.JWT_SECRET
     );
 
     let updatedRefreshToken = jwt.sign(
-      updatedUser.email,
+      { email: updatedUser.email, userID: updatedUser._id },
       process.env.REFRESH_TOKEN_SECRET
     );
 
     res.statusCode = 200;
-    res.json({
+    return res.json({
       accessToken: updatedAccessToken,
       refreshToken: updatedRefreshToken,
     });
@@ -246,7 +220,6 @@ module.exports = {
 
   changePassword: async (req, res) => {
     // validate that user exists
-    console.log(req.params);
     let user = null;
 
     try {
@@ -258,15 +231,7 @@ module.exports = {
 
     if (!user) {
       res.statusCode = 400;
-      return res.json();
-    }
-
-    console.log(user);
-
-    // validate that user has auth
-    if (!req.headers.auth_token) {
-      res.statusCode = 403;
-      return res.json(`Not authorised!`);
+      return res.json(`User not found`);
     }
 
     // validate user input to change pw
@@ -274,7 +239,7 @@ module.exports = {
 
     if (validationResult.error) {
       res.statusCode = 400;
-      res.json(validationResult.error);
+      res.json(validationResult.error.details[0].message);
     }
 
     const validatedPasswords = validationResult.value;
@@ -282,10 +247,7 @@ module.exports = {
     // check that both passwords are the same
     if (validatedPasswords.password !== validatedPasswords.confirmPassword) {
       res.statusCode = 400;
-      return res.json({
-        success: "false",
-        message: "Passwords do not match",
-      });
+      return res.json(`Passwords should match`);
     }
 
     // encrypt password to hash
@@ -296,6 +258,11 @@ module.exports = {
     } catch (err) {
       res.statusCode = 500;
       return res.json(err);
+    }
+
+    if (!newHash) {
+      res.statusCode = 500;
+      return res.json("Server Error");
     }
 
     // save new hash in db
@@ -319,8 +286,6 @@ module.exports = {
     let newToken,
       newRefreshToken = null;
 
-    console.log(user.email);
-
     try {
       newToken = await jwt.sign(user.email, process.env.JWT_SECRET);
 
@@ -330,12 +295,12 @@ module.exports = {
       );
     } catch (err) {
       res.statusCode = 500;
-      return res.json(`kekl`);
+      return res.json(err);
     }
 
     if (!newToken || !newRefreshToken) {
       res.statusCode = 500;
-      return res.json(`Error`);
+      return res.json(`Error providing authorisation`);
     }
 
     return res.json({
@@ -347,6 +312,54 @@ module.exports = {
   logout: (req, res) => {
     //  clear token from client side
     res.clearCookie("auth_token");
-    return res.json(`Logout successful`);
+    res.statusCode = 204;
+    return res.json();
+  },
+
+  showAll: async (req, res) => {
+    // show all users so that people can see who they can follow
+    // Discover - Users
+    // authenticated users only
+
+    let findUsers = null;
+
+    try {
+      findUsers = await UserModel.find();
+    } catch (err) {
+      res.statusCode = 500;
+      return res.json(err);
+    }
+
+    if (!findUsers) {
+      res.statusCode = 500;
+      return res.json(`Unable to find users`);
+    }
+
+    res.statusCode = 200;
+    return res.json(findUsers);
+  },
+
+  showOne: async (req, res) => {
+    // allow users to aaccess more details about one other user
+    // this should allow us to display the user details, bucketlists, itineraries, who user follows, who follows them
+    // validate the request of the user email - ensure that user is valid
+
+    // ensuring that user exists
+    let verifiedUser = null;
+
+    try {
+      verifiedUser = await UserModel.findOne({ email: req.params.email });
+    } catch (err) {
+      res.statusCode = 500;
+      return res.json(err);
+    }
+
+    if (!verifiedUser) {
+      res.statusCode = 404;
+      return res.json(`unable to find user`);
+    }
+
+    res.statusCode = 200;
+    return res.json(verifiedUser);
   },
 };
