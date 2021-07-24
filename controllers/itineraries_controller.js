@@ -121,6 +121,25 @@ module.exports = {
     },
 
 
+    getItinerary: async (req, res) => {
+
+        // validate that the itineraryID is valid 
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            res.statusCode = 400
+            return res.json("Itinerary ID is invalid")
+        }
+
+        // retrieving itinerary by ID
+        ItinerariesModel.findById(req.params.id)
+            .then(response => {
+                return res.json(response)
+            })
+            .catch(err => {
+                return res.json(err)
+            })
+    },
+
+
     create: (req, res) => {
         console.log(req.body)
         // validation
@@ -182,21 +201,46 @@ module.exports = {
 
     },
 
-    getItinerary: async (req, res) => {
 
-        // validate that the itineraryID is valid 
-        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    update: (req, res) => {
+        
+         // validate that the itineraryID is valid 
+         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
             res.statusCode = 400
             return res.json("Itinerary ID is invalid")
         }
 
-        // retrieving itinerary by ID
-        ItinerariesModel.findById(req.params.id)
+        // input validation
+        const validationResult = itinerariesValidator.validate(req.body)
+        if (validationResult.error) {
+            res.statusCode = 400
+            return res.json(validationResult.error)
+        }
+
+        const validatedParams = validationResult.value
+
+
+        let createParams = {
+            name: validatedParams.name,
+            destination: validatedParams.destination,
+            season: validatedParams.season,
+            trip_duration: validatedParams.trip_duration,
+            itinerary: validatedParams.itinerary,
+            creator: "60e91dc46bddd93fecb25c6d",
+            published: false
+        }
+
+   
+        // create 
+        ItinerariesModel.findByIdAndUpdate(req.params.id, createParams)
             .then(response => {
-                return res.json(response)
+                res.statusCode = 201
+                return res.json("item updated")
             })
             .catch(err => {
+                res.statusCode = 500
                 return res.json(err)
             })
+
     },
 }

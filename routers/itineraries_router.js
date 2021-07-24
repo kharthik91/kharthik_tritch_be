@@ -15,8 +15,8 @@ router.post('/',itinerariesController.create)
 // retrieve itinerary
 router.get('/view/:id', itinerariesController.getItinerary)
 
-// // update
-// router.patch('/:slug', itineraryController.update)
+// update
+router.patch('/:id', itinerariesController.update)
 
 // // delete
 // router.delete('/:slug', itineraryController.delete)
