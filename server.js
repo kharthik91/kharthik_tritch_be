@@ -36,7 +36,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/v1/itineraries", itinerariesRouter);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/comments", commentsRouter);
-app.use("/api/v1/follow", followRouter);
+app.use("/api/v1/following", followRouter);
 
 mongoose
   .connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })

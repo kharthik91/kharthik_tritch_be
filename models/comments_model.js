@@ -10,7 +10,7 @@ const CommentsSchema = new mongoose.Schema({
   itineraries: { type: Schema.Types.ObjectId, ref: ItinerariesModel},
   // itinerary_id: {type: String, required: true},
   // user_id: {type: String, required: true },
-});
+},{timestamps: true});
 
 const CommentsModel = mongoose.model("Comments", CommentsSchema);
 
