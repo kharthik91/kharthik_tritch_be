@@ -1,82 +1,138 @@
-const express = require('express')
-const router = express.Router()
-const mongoose = require("mongoose"); 
-const { CommentsModel } = require('../models/comments_model')
+const express = require("express");
+const mongoose = require("mongoose");
+const { CommentsModel } = require("../models/comments_model");
+const router = express.Router();
+const { commentsValidator } = require("../validations/comments_validation");
 
-module.exports= {
-
-// Get all comments
-index: (req, res) => {
-    CommentsModel.find({}, (err, data) => {
-        if(!err) {
-            res.send(data);
-        } else {
-            console.log(err);
-        }
-    });
-},
-
-// Get one comment
-
-show: (req, res) => {
-    CommentsModel.findById(req.params.id, (err, data) => {
-        if(!err) {
-            res.send(data);
-        } else {
-           console.log(err);
-        }
-    });
-},
-
-// create comment
-create: async (req, res) => {
-    let cmt = null
-    try {
-     cmt = await CommentsModel.create({
-        comments: req.body.comments,
-        itinerary_id: req.body.itinerary_id,
-        user_id: req.body.user_id
-    }); 
-    } catch (err) {
-        console.log(err);
-        return res.json()
+module.exports = {
+    //show comments under itineray
+  showitinerarycomments: (req, res) => {
+    if (!mongoose.Types.ObjectId.isValid(req.params.itineraries)) {
+      res.statusCode = 400;
+      return res.json();
     }
-    console.log(req.body)
-    res.statusCode = 200
-    return res.json()
-},
 
+    CommentsModel.find({ itineraries: req.params.itineraries })
+      .populate("itineraries")
+      .then((response) => {
+        if (!response) {
+          res.statusCode = 404;
+          return res.json();
+        }
 
+        return res.json(response);
+      })
+      .catch((err) => {
+        console.log(err);
+        res.statusCode = 500;
+        return res.json(err);
+      });
+  },
+//show comments under user
+  showusercomments: (req, res) => {
+    if (!mongoose.Types.ObjectId.isValid(req.params.user)) {
+      res.statusCode = 400;
+      console.log();
+      return res.json();
+    }
 
-// update comment
+    CommentsModel.find({ user: req.params.user })
+      .populate("user")
+      .then((response) => {
+        if (!response) {
+          res.statusCode = 404;
+          return res.json();
+        }
 
-update: (req, res) => {
+        return res.json(response);
+      })
+      .catch((err) => {
+        console.log(err);
+        res.statusCode = 500;
+        return res.json(err);
+      });
+  },
 
-    const cmt = {
+  // create comment
+  create: async (req, res) => {
+    //validation
+    const commentsValidatorResult = commentsValidator.validate(req.body);
+    if (commentsValidatorResult.error) {
+      res.statusCode = 400;
+      return res.json(commentsValidatorResult.error);
+    }
+
+    let cmt = null;
+    try {
+      cmt = await CommentsModel.create({
         comments: req.body.comments,
-    };
-    CommentsModel.findByIdAndUpdate(req.params.id, { $set: cmt }, { new: true }, (err, data) => {
-        if(!err) {
-            res.status(200).json({code: 200, message: 'comment updated', updateComment: data})
-        } else {
-            console.log(err);
-        }
-    });
-},
+        user: req.params.user,
+        itineraries: req.params.itineraries,
+      });
+    } catch (err) {
+      console.log(err);
+      return res.json();
+    }
+    console.log(req.body);
+    res.statusCode = 200;
+    return res.json();
+  },
 
+  // update comment
+  update: async (req, res) => {
+    //validation
+    const commentsValidatorResult = commentsValidator.validate(req.body);
+    if (commentsValidatorResult.error) {
+      res.statusCode = 400;
+      return res.json(commentsValidatorResult.error);
+    }
+    const validatedParams = commentsValidatorResult.value;
 
+    let cmt = null;
 
-// Delete comment
-delete: (req, res) => {
+    try {
+      cmt = await CommentsModel.findOne({ _id: req.params.id });
+    } catch (err) {
+      res.statusCode = 500;
+      return res.json(err);
+    }
+    if (!cmt) {
+      res.statusCode = 404;
+      return res.json();
+    }
+    try {
+      await cmt.updateOne(validatedParams);
+    } catch (err) {
+      res.statusCode = 500;
+      return res.json();
+    }
+    return res.json();
+  },
 
-    CommentsModel.findByIdAndRemove(req.params.id, (err, data) => {
-        if(!err) {
-            // res.send(data);
-            res.status(200).json({code: 200, message: 'comment deleted', deleteComment: data})
-        } else {
-            console.log(err);
-        }
-    });
-},
+  // Delete comment
+  delete: async (req, res) => {
+    let cmt = null;
 
-}
+    // check if comment exists
+    try {
+      cmt = await CommentsModel.findOne({ _id: req.params.id });
+    } catch (err) {
+      res.statusCode = 500;
+      return res.json(err);
+    }
+    if (!cmt) {
+      res.statusCode = 404;
+      return res.json();
+    }
+
+    try {
+      await CommentsModel.deleteOne({ _id: req.params.id });
+    } catch (err) {
+      console.log(err);
+      res.statusCode = 500;
+      return res.json(err);
+    }
+
+    return res.json();
+  },
+};

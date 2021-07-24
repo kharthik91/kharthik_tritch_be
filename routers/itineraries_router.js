@@ -12,11 +12,11 @@ router.get('/:userid', itinerariesController.listOwner)
 // create
 router.post('/',itinerariesController.create)
 
-// // edit
-// router.get('/:slug/edit', itineraryController.editForm)
+// retrieve itinerary
+router.get('/view/:id', itinerariesController.getItinerary)
 
-// // update
-// router.patch('/:slug', itineraryController.update)
+// update
+router.patch('/:id', itinerariesController.update)
 
 // // delete
 // router.delete('/:slug', itineraryController.delete)

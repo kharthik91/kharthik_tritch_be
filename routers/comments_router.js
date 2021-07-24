@@ -2,15 +2,14 @@ const express = require("express");
 const router = express.Router();
 const commentsController = require('../controllers/comments_controller');
 
-
 //shows iternay comment
-router.get('/:itnerary_id', commentsController.index);
+router.get('/itnerary/:itineraries', commentsController.showitinerarycomments);
 
-//show route 
-router.get('/:id', commentsController.show);
+//show route for comments
+router.get('/:user', commentsController.showusercomments);
 
 //create route 
-router.post('/new', commentsController.create);
+router.post('/:user/itinerary/:itineraries/new', commentsController.create);
 
 //update
 router.put('/:id', commentsController.update);
