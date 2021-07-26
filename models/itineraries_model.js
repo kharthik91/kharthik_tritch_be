@@ -1,10 +1,9 @@
 const mongoose = require('mongoose')
 const EnumSeasons = ['Spring', 'Summer', 'Fall', 'Winter']
 
-
 const itinerariesSchema = new mongoose.Schema ({
 
-    name: { type: String, required: true },
+    location: { type: String, required: true },
     destination: { type: String, required: true },
     latlong: { type: String },
     season: { type: String, required: true, enum: EnumSeasons },

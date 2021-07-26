@@ -4,7 +4,7 @@ const placesController = require('../controllers/places_controller')
 
 
 // get attractions by location
-router.get('/:location', placesController.search)
+router.get('/:location/:latlong', placesController.search)
 
 router.get('/photo/:photoref', placesController.photo)
 
