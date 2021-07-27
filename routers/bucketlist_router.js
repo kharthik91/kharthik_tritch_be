@@ -5,24 +5,12 @@ const { authenticated } = require("../middlewares/user_auth");
 
 // ROUTES //
 
-router.post(
-  "/:userID/add/:itinerariesID",
-  authenticated,
-  bucketlistController.addToBucketlist
-);
+router.post("/add", authenticated, bucketlistController.addToBucketlist);
 
-router.patch(
-  "/:userID/update/:itinerariesID",
-  authenticated,
-  bucketlistController.beenThere
-);
+router.patch("/update", authenticated, bucketlistController.beenThere);
 
-router.delete(
-  "/:userID/remove/:itinerariesID",
-  authenticated,
-  bucketlistController.delete
-);
+router.delete("/remove", authenticated, bucketlistController.delete);
 
-router.get("/:userID/itineraries/all", bucketlistController.show);
+router.get("/:userID/view", bucketlistController.show);
 
 module.exports = router;

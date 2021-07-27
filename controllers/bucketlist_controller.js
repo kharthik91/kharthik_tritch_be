@@ -7,6 +7,7 @@ const { BucketlistModel } = require("../models/bucketlist_model");
 
 const {
   bucketlistValidator,
+  deleteBucketlistValidator,
 } = require("../validations/bucketlist_validations");
 
 module.exports = {
@@ -22,13 +23,15 @@ module.exports = {
     }
 
     const validatedParams = validationResult.value;
+    console.log(validatedParams);
 
     // make sure that itinerary is not already on bucketlist
     let bucketlistItem = null;
 
     try {
       bucketlistItem = await BucketlistModel.findOne({
-        email: validatedParams.email,
+        user: validatedParams.userID,
+        itineraries: validatedParams.itinerariesID,
       });
     } catch (err) {
       res.statusCode = 500;
@@ -44,10 +47,9 @@ module.exports = {
 
     try {
       addBucketlistResponse = await BucketlistModel.create({
-        email: validatedParams.email,
-        itineraries: req.params.itinerariesID,
-        user: req.params.userID,
         been_there: validatedParams.been_there,
+        user: validatedParams.userID,
+        itineraries: validatedParams.itinerariesID,
       });
     } catch (err) {
       res.statusCode = 500;
@@ -61,7 +63,7 @@ module.exports = {
     }
 
     res.statusCode = 204;
-    return res.json(addBucketlistResponse);
+    return res.json();
   },
 
   beenThere: async (req, res) => {
@@ -76,22 +78,16 @@ module.exports = {
 
     const validatedParams = validationResult.value;
 
-    // check for value of been_there
-    let beenThereToggler = false;
-
-    if (!validatedParams.been_there) {
-      beenThereToggler = true;
-    }
-
     let updateResponse = null;
 
     try {
       updateResponse = await BucketlistModel.findOneAndUpdate(
         {
-          itinerary_id: validatedParams.itinerary_id,
+          user: validatedParams.userID,
+          itineraries: validatedParams.itinerariesID,
         },
         {
-          been_there: beenThereToggler,
+          been_there: validatedParams.been_there,
         }
       );
     } catch (err) {
@@ -111,7 +107,7 @@ module.exports = {
   delete: async (req, res) => {
     // remove itinerary from bucketlist
 
-    const validationResult = bucketlistValidator.validate(req.body);
+    const validationResult = deleteBucketlistValidator.validate(req.body);
 
     if (validationResult.error) {
       res.statusCode = 400;
@@ -124,7 +120,8 @@ module.exports = {
 
     try {
       removeResponse = await BucketlistModel.deleteOne({
-        user_id: validatedParams.user_id,
+        user: validatedParams.userID,
+        itineraries: validatedParams.itinerariesID,
       });
     } catch (err) {
       res.statusCode = 500;
@@ -135,20 +132,27 @@ module.exports = {
       res.statusCode = 500;
       return res.json(`Error encountered when deleting`);
     }
+
+    return res.json();
   },
 
   show: async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(req.params.userID)) {
       res.statusCode = 400;
-      return res.json();
+      return res.json(`error!`);
     }
 
-    await BucketlistModel.findOne({
+    await BucketlistModel.find({
       user: req.params.userID,
     })
       .populate("itineraries")
       .populate("user")
       .then((response) => {
+        if (!response) {
+          res.statusCode = 500;
+          return res.json(`Oops! Server error`);
+        }
+        res.statusCode = 200;
         return res.json(response);
       })
       .catch((err) => {
