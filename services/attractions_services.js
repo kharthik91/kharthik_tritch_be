@@ -1,25 +1,19 @@
 const axios = require('axios'); 
-const {PlacesModel} = require('../models/places_model')
+const {AttractionsModel} = require('../models/attractions_model')
 
 module.exports = {
  
-    checkLocation: async(res, location) => {
-        
-        try {
-            let locationData = await PlacesModel.findOne({destination: location})
- 
-            return locationData
+    checkLocation: async(location) => {
+        let locationData = await AttractionsModel.findOne({destination: location})
+        if(!locationData) {
+            return
             
-        } catch (err) {
-            
-            console.log(`Location does not exist in DB`) 
         }
+        return locationData
     },
 
-
     createLocationData: async(res, location, latlong, attractions) => {
-        try {
-            await PlacesModel.create({
+        try {AttractionsModel.create({
                 destination: location,
                 latlong: latlong,
                 attractions: attractions
@@ -35,12 +29,12 @@ module.exports = {
 
 // Search for attractions from google places
 
-    placeSearch: async(res, location) => {
+    placeSearch: async(location) => {
         
         try {
             let results = await axios({
                 method: 'GET',
-                url: `https://maps.googleapis.com/maps/api/place/nearbysearch/json?key=${process.env.GOOGLEAPI_KEY}&location=${location}&radius=50000&type=tourist_attraction`,
+                url: `https://maps.googleapis.com/maps/api/place/nearbysearch/json?key=${process.env.GOOGLEAPI_KEY}&location=${location}&radius=45000`,
             })
             // console.log(results.data)
             return results.data.results
@@ -52,7 +46,7 @@ module.exports = {
     },
  
 // Retrieve attraction photos from google places
-    placePhoto: async(res, photoRef) => {
+    placePhoto: async(photoRef) => {
         
         try {
             let photo = await axios({
@@ -66,5 +60,7 @@ module.exports = {
             res.statusCode = 500
             return `Unable to retrieve photo`
         }
-    }
+    },
+
+    
 }

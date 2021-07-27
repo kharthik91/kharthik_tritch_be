@@ -1,8 +1,8 @@
 const mongoose = require('mongoose')
 
 
-const placesSchema = new mongoose.Schema ({
-
+const attractionsSchema = new mongoose.Schema ({
+    slug: { type: String},
     destination: { type: String, required: true },
     latlong: { type: String },
     attractions: [{
@@ -14,6 +14,6 @@ const placesSchema = new mongoose.Schema ({
   },{timestamps: true})
 
 
-const PlacesModel = mongoose.model('Places', placesSchema)
+const AttractionsModel = mongoose.model('Attractions', attractionsSchema)
 
-module.exports = { PlacesModel}
+module.exports = { AttractionsModel}

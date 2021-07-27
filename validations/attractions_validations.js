@@ -2,7 +2,7 @@ const Joi = require('joi')
 
 module.exports = {
 
-    placesValidator: Joi.object({
+    attractionsValidator: Joi.object({
         latlong: Joi.string()
             .min(3)
             .max(50)
