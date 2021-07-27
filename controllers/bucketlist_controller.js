@@ -78,13 +78,6 @@ module.exports = {
 
     const validatedParams = validationResult.value;
 
-    // check for value of been_there
-    let beenThereToggler = false;
-
-    if (validatedParams.been_there) {
-      beenThereToggler = true;
-    }
-
     let updateResponse = null;
 
     try {
@@ -94,7 +87,7 @@ module.exports = {
           itineraries: validatedParams.itinerariesID,
         },
         {
-          been_there: beenThereToggler,
+          been_there: validatedParams.been_there,
         }
       );
     } catch (err) {
