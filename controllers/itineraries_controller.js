@@ -1,7 +1,8 @@
 const _ = require('lodash')
 const mongoose = require('mongoose')
 const {ItinerariesModel} = require('../models/itineraries_model')
-const {listValidator, itinerariesValidator} = require('../validations/itineraries_validations')
+const {getItineraries, countItineraries, getItinerary, createItinerary, updateItinerary, deleteItinerary} = require ('../services/itineraries_services')
+const {idValidator, listValidator, itinerariesValidator} = require('../validations/itineraries_validations')
 const jwt = require('jsonwebtoken')
 const moment = require('moment')
 
@@ -36,27 +37,16 @@ module.exports = {
         if (validatedParams.destination) {
             filters.destination = validatedParams.destination
         }
+       
+        let totalCount = await countItineraries(res, filters)
+        let itineraries = await getItineraries(res, filters, perPage, page)
+    
+        return res.json({
+            itineraries: itineraries,
+            totalCount: totalCount
+        })
+        
 
-        // determinining total number of docs in DB that satisfies the filters
-        let totalCount = 0
-        try {
-            totalCount = await ItinerariesModel.countDocuments(filters)
-        } catch (err) {
-            res.statusCode = 500
-            return res.json("nothing to see here")
-        }
-
-        // retrieving paginated data based on the filters
-        ItinerariesModel.find(filters).skip(perPage * page).limit(perPage)
-            .then(response => {
-                return res.json({
-                    itineraries: response,
-                    totalCount: totalCount
-                })
-            })
-            .catch(err => {
-                return res.json(err)
-            })
     },
 
     listOwner: async (req, res) => {
@@ -98,50 +88,29 @@ module.exports = {
 
         filters.creator = req.params.userid
 
-        // determinining total number of docs in DB that satisfies the filters
-        let totalCount = 0
-        try {
-            totalCount = await ItinerariesModel.countDocuments(filters)
-        } catch (err) {
-            res.statusCode = 500
-            return res.json("nothing to see here")
-        }
 
-        // retrieving paginated data based on the filters
-        ItinerariesModel.find(filters).skip(perPage * page).limit(perPage)
-            .then(response => {
-                return res.json({
-                    itineraries: response,
-                    totalCount: totalCount
-                })
-            })
-            .catch(err => {
-                return res.json(err)
-            })
+        let totalCount = await countItineraries(res, filters)
+        let itineraries = await getItineraries(res, filters, perPage, page)
+        
+        return res.json({
+            itineraries: itineraries,
+            totalCount: totalCount
+        })
+        
     },
 
 
     getItinerary: async (req, res) => {
 
         // validate that the itineraryID is valid 
-        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-            res.statusCode = 400
-            return res.json("Itinerary ID is invalid")
-        }
-
-        // retrieving itinerary by ID
-        ItinerariesModel.findById(req.params.id)
-            .then(response => {
-                return res.json(response)
-            })
-            .catch(err => {
-                return res.json(err)
-            })
+        idValidator(res, req.params.id)
+    
+        let itinerary = await getItinerary(res, req.params.id)
+        return res.json(itinerary)
     },
 
 
-    create: (req, res) => {
-        console.log(req.body)
+    createItinerary: async (req, res) => {
         // validation
         const validationResult = itinerariesValidator.validate(req.body)
         if (validationResult.error) {
@@ -150,28 +119,6 @@ module.exports = {
         }
 
         const validatedParams = validationResult.value
-
-        //  // check if auth_token header is given, if not, return 401 unauthorised
-        // if (!req.headers.auth_token) {
-        //     res.statusCode = 401
-        //     return res.json()
-        // }
-
-        //  // verify JWT token
-        //  let decodedJWT = null
-        //  try {
-        //      decodedJWT = jwt.verify(req.headers.auth_token, process.env.JWT_SECRET)
-        //  } catch (err) {
-        //      res.statusCode = 403
-        //      return res.json()
-        //  }
-        //  if (decodedJWT === null) {
-        //     res.statusCode = 403
-        //     return res.json()
-        //  }
-
-
-        // return res.json()
 
         let createParams = {
             name: validatedParams.name,
@@ -183,32 +130,21 @@ module.exports = {
             published: false
         }
 
-        // // check if there is a file upload
-        // if (req.file) {
-        //     createParams.image = req.file.path
-        // }
 
-        // create 
-        ItinerariesModel.create(createParams)
-            .then(response => {
-                res.statusCode = 201
-                return res.json("item created")
-            })
-            .catch(err => {
-                res.statusCode = 500
-                return res.json(err)
-            })
+        // create itinerary
+    
+        let created = await createItinerary(res, createParams)
+        
+        return res.json(created)
+   
 
     },
 
 
-    update: (req, res) => {
+    updateItinerary: async (req, res) => {
         
-         // validate that the itineraryID is valid 
-         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-            res.statusCode = 400
-            return res.json("Itinerary ID is invalid")
-        }
+        // validate that the itineraryID is valid 
+        idValidator(res, req.params.id)
 
         // input validation
         const validationResult = itinerariesValidator.validate(req.body)
@@ -220,27 +156,31 @@ module.exports = {
         const validatedParams = validationResult.value
 
 
-        let createParams = {
+        let updateParams = {
             name: validatedParams.name,
             destination: validatedParams.destination,
             season: validatedParams.season,
             trip_duration: validatedParams.trip_duration,
             itinerary: validatedParams.itinerary,
-            creator: "60e91dc46bddd93fecb25c6d",
-            published: false
+            // creator: "60e91dc46bddd93fecb25c6d",
+            published: validatedParams.published
         }
 
    
-        // create 
-        ItinerariesModel.findByIdAndUpdate(req.params.id, createParams)
-            .then(response => {
-                res.statusCode = 201
-                return res.json("item updated")
-            })
-            .catch(err => {
-                res.statusCode = 500
-                return res.json(err)
-            })
+        // Update itinerary
+        let updated = await updateItinerary(res, req.params.id, updateParams)
+        return res.json(updated)
 
     },
+
+    deleteItinerary: async (req, res) => {
+        
+        // validate that the itineraryID is valid 
+        idValidator(res, req.params.id)
+        
+       // delete
+        let deleted = await deleteItinerary(res, req.params.id)
+        return res.json(updated)
+
+   },
 }

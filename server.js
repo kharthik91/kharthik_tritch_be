@@ -10,6 +10,8 @@ const userRouter = require("./routers/users_router");
 const commentsRouter = require("./routers/comments_router");
 const bucketlistRouter = require("./routers/bucketlist_router");
 const followRouter = require("./routers/follow_router")
+const attractionsRouter = require("./routers/attractions_router")
+const citiesRouter = require("./routers/cities_router")
 
 
 const app = express();
@@ -39,6 +41,8 @@ app.use("/api/v1/users", userRouter);
 app.use("/api/v1/comments", commentsRouter);
 app.use("/api/v1/bucketlist", bucketlistRouter);
 app.use("/api/v1/following", followRouter);
+app.use("/api/v1/attractions", attractionsRouter);
+app.use("/api/v1/cities", citiesRouter);
 
 
 mongoose
