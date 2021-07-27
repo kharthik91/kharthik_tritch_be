@@ -4,7 +4,6 @@ const { UserModel } = require("../models/users_model");
 const { ItinerariesModel } = require("../models/itineraries_model");
 
 const bucketlistSchema = new mongoose.Schema({
-  email: { type: String, required: true, unique: true },
   itineraries: {
     type: Schema.Types.ObjectId,
     ref: ItinerariesModel,
@@ -16,6 +15,8 @@ const bucketlistSchema = new mongoose.Schema({
 
   been_there: { type: Boolean, default: false, required: true },
 });
+
+bucketlistSchema.set("autoIndex", false);
 
 const BucketlistModel = mongoose.model("Bucketlist", bucketlistSchema);
 
