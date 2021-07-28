@@ -13,6 +13,9 @@ const itinerariesSchema = new mongoose.Schema ({
         title: { type: String },
         start: { type: Date },
         end: { type: Number},
+        extendedProps:{
+            image:{ type: String },
+        },
     }],
     creator: { type: String, required: true},
     editors: [{ type: String }],

@@ -3,14 +3,28 @@ const mongoose = require('mongoose')
 
 const citiesSchema = new mongoose.Schema ({
     slug: { type: String, required: true },
-    destination: { type: String, required: true },
+    destinationType: { type: String },
+    name: { type: String, required: true },
+    longName: { type: String},
+    population: { type: Number},
     latlong: { type: String },
-    attractions: [{
-        name: { type: String },
-        photoReference: { type: String },
-        photoUrl: { type: String },
-        rating: { type: Number},
+    lat: { type: String },
+    long: { type: String },
+    budget: {
+      value: { type: Number },
+      text: { type: String },
+    },
+    safety: {
+      value: { type: Number },
+      text: { type: String },
+    },
+    rating: {type: Number},
+    knownFor: [{
+      name:{type:String},
+      icon:{type:String},
     }],
+    image: { type: String },
+   
   },{timestamps: true})
 
 

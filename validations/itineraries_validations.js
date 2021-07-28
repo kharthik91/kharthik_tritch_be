@@ -34,7 +34,8 @@ module.exports = {
         itinerary: Joi.array().items({
             title: Joi.string(),
             start: Joi.date(),
-            end: Joi.date()
+            end: Joi.date(),
+            extendedProps: Joi.object()
         }),
         creator: Joi.string(),
         editors: Joi.array().items(Joi.string()),

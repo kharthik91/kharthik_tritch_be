@@ -5,8 +5,7 @@ module.exports = {
     attractionsValidator: Joi.object({
         latlong: Joi.string()
             .min(3)
-            .max(50)
-            .required(),
+            .max(50),
         location: Joi.string()
             .min(3)
             .max(50)
