@@ -13,7 +13,7 @@ const bucketlistSchema = new mongoose.Schema({
     ref: UserModel,
   },
 
-  been_there: { type: Boolean, default: false, required: true },
+  been_there: { type: Boolean, default: false },
 });
 
 bucketlistSchema.set("autoIndex", false);
