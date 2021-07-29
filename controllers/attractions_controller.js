@@ -36,8 +36,8 @@ module.exports = {
             }
 
             // Take raw attraction data and extract necessary data and push to attractions array
-           
-            rawAttractions.map( (item) => {
+         console.log(rawAttractions[0].photos[0].photo_reference)  
+            await Promise.all(rawAttractions.map( (item) => {
                 // Retrieve photo
    
                 attractions.push({
@@ -45,7 +45,7 @@ module.exports = {
                     photoReference: item.photos[0].photo_reference,
                     rating: item.rating
                 })
-            })
+            }))
             
            
             
