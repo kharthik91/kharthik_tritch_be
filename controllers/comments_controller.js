@@ -5,7 +5,7 @@ const router = express.Router();
 const { commentsValidator } = require("../validations/comments_validation");
 
 module.exports = {
-    //show comments under itineray
+  //show comments under itineray
   showitinerarycomments: (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(req.params.itineraries)) {
       res.statusCode = 400;
@@ -14,6 +14,7 @@ module.exports = {
 
     CommentsModel.find({ itineraries: req.params.itineraries })
       .populate("itineraries")
+      .populate("user")
       .then((response) => {
         if (!response) {
           res.statusCode = 404;
@@ -28,7 +29,7 @@ module.exports = {
         return res.json(err);
       });
   },
-//show comments under user
+  //show comments under user
   showusercomments: (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(req.params.user)) {
       res.statusCode = 400;
