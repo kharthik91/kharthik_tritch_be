@@ -5,7 +5,7 @@ module.exports = {
 
     getItineraries: async(res, filters, perPage, page) => {
         try {
-            let itineraries = await ItinerariesModel.find(filters).skip(perPage * page).limit(perPage).populate("creator").populate("editors")
+            let itineraries = await ItinerariesModel.find(filters).skip(perPage * page).limit(perPage).populate("creator")
             return itineraries
         } catch (err) {
             res.statusCode = 500
@@ -25,7 +25,7 @@ module.exports = {
     
     getItinerary: async(res, id) => {
         try {
-            let itinerary = await ItinerariesModel.findById(id).populate("user")
+            let itinerary = await ItinerariesModel.findById(id).populate("creator")
             return itinerary
         } catch (err) {
             res.statusCode = 500
