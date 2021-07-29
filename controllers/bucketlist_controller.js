@@ -153,6 +153,7 @@ module.exports = {
           return res.json(`Oops! Server error`);
         }
         res.statusCode = 200;
+        console.log(response)
         return res.json(response);
       })
       .catch((err) => {

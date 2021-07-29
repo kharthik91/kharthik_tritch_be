@@ -7,7 +7,7 @@ const citiesController = require('../controllers/cities_controller')
 router.get('/:slug', citiesController.search)
 
 // get city slug by autocomplete
-// router.get('/:slug/:latlong', citiesController.autoComplete)
+router.get('/search/:query', citiesController.autoComplete)
 
 
 module.exports = router

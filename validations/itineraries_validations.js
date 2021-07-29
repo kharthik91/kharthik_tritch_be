@@ -17,6 +17,7 @@ module.exports = {
         page: Joi.number().min(0).allow("", null),
         per_page: Joi.number().min(0).allow("", null),
     }),
+    
     itinerariesValidator: Joi.object({
         name: Joi.string()
             .min(3)
@@ -34,7 +35,8 @@ module.exports = {
         itinerary: Joi.array().items({
             title: Joi.string(),
             start: Joi.date(),
-            end: Joi.date()
+            end: Joi.date(),
+            extendedProps: Joi.object()
         }),
         creator: Joi.string(),
         editors: Joi.array().items(Joi.string()),

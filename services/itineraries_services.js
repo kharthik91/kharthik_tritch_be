@@ -5,7 +5,7 @@ module.exports = {
 
     getItineraries: async(res, filters, perPage, page) => {
         try {
-            let itineraries = await ItinerariesModel.find(filters).skip(perPage * page).limit(perPage)
+            let itineraries = await ItinerariesModel.find(filters).skip(perPage * page).limit(perPage).populate("creator").populate("editors")
             return itineraries
         } catch (err) {
             res.statusCode = 500
@@ -25,7 +25,7 @@ module.exports = {
     
     getItinerary: async(res, id) => {
         try {
-            let itinerary = await ItinerariesModel.findById(id)
+            let itinerary = await ItinerariesModel.findById(id).populate("user")
             return itinerary
         } catch (err) {
             res.statusCode = 500
@@ -35,9 +35,9 @@ module.exports = {
 
     createItinerary: async(res, createParams) => {
         try {
-            await ItinerariesModel.create(createParams)
+            let itinerary = await ItinerariesModel.create(createParams)
             res.statusCode = 201
-            return `Itinerary updated`
+            return itinerary
         } catch (err) {
             res.statusCode = 500
             return `Unable to write itinerary to database`

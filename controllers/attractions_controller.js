@@ -1,30 +1,34 @@
 const mongoose = require('mongoose')
 const {attractionsValidator} = require('../validations/attractions_validations')
 const {checkLocation, createLocationData, placeSearch, placePhoto} = require ('../services/attractions_services')
+const { checkCity } = require('../services/cities_services')
 module.exports = {
 
 
     search: async (req, res) => {
         let attractions = []
         let photo
-        const validationResult = attractionsValidator.validate(req.params)
-        if (validationResult.error) {
-            res.statusCode = 400
-            return res.json(validationResult.err)
-        }
+        // const validationResult = attractionsValidator.validate(req.params)
+        // if (validationResult.error) {
+        //     res.statusCode = 400
+        //     return res.json(validationResult.err)
+        // }
 
         // Check if location data exist in DB first
         let locationData = await checkLocation(req.params.location)
         
         if (locationData) {
-            return res.json(locationData);
+            return res.json(locationData.attractions);
             
         } else {
 
 
             // Retrieve location data from google places api
             try{
+                // let cityData = await checkCity(req.params.location)
+                
                 rawAttractions = await placeSearch(req.params.latlong)
+                
             }
             catch(err) {
                 console.log(err)
@@ -64,6 +68,7 @@ module.exports = {
                 console.log(err)
                 return
             }
+            console.log(attractions)
             return res.json(attractions);
 
         }

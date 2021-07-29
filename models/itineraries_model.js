@@ -1,22 +1,27 @@
 const mongoose = require('mongoose')
 const EnumSeasons = ['Spring', 'Summer', 'Fall', 'Winter']
+const { UserModel } = require('./users_model') 
+const Schema = mongoose.Schema;
 
 const itinerariesSchema = new mongoose.Schema ({
 
-    location: { type: String, required: true },
+    name: { type: String},
     destination: { type: String, required: true },
     latlong: { type: String },
-    season: { type: String, required: true, enum: EnumSeasons },
-    trip_duration: { type: Number, min: 1, max: 30, required: true },
+    season: { type: String, enum: EnumSeasons },
+    trip_duration: { type: Number, min: 1, max: 30},
     itinerary: [{
         day: { type: Date},
         title: { type: String },
         start: { type: Date },
         end: { type: Number},
+        extendedProps:{
+            image:{ type: String },
+        },
     }],
-    creator: { type: String, required: true},
-    editors: [{ type: String }],
-    published: { type: Boolean, required: true, default: false }
+    creator: { type: Schema.Types.ObjectId, ref: UserModel},
+    editors: [{ type: Schema.Types.ObjectId, ref: UserModel}],
+    published: { type: Boolean, default: false }
   },{timestamps: true})
 
 
