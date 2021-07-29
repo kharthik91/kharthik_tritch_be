@@ -19,8 +19,8 @@ router.patch(
 
 router.get("/logout", authenticated, userController.logout);
 
-router.get("/display-users/all", authenticated, userController.showAll);
+router.get("/show/all", userController.showAll);
 
-router.get("/display-users/:userID", authenticated, userController.showOne);
+router.get("/show/:userID", authenticated, userController.showOne);
 
 module.exports = router;

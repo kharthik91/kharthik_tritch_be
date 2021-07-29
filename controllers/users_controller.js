@@ -317,8 +317,6 @@ module.exports = {
 
   showAll: async (req, res) => {
     // show all users so that people can see who they can follow
-    // Discover - Users
-    // authenticated users only
 
     let findUsers = null;
 

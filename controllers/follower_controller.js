@@ -5,7 +5,6 @@ const { followValidator } = require("../validations/follow_validation");
 const router = express.Router();
 
 module.exports = {
-
   //show comments under user
   show: (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(req.params.user)) {
@@ -55,8 +54,6 @@ module.exports = {
     return res.json();
   },
 
- 
-
   // remove follower
   delete: async (req, res) => {
     let flw = null;
@@ -83,5 +80,4 @@ module.exports = {
 
     return res.json();
   },
-}
-
+};
