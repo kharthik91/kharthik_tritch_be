@@ -10,16 +10,16 @@ router.get('/', itinerariesController.listAll)
 router.get('/:userid', itinerariesController.listOwner)
 
 // create
-router.post('/',itinerariesController.create)
+router.post('/',itinerariesController.createItinerary)
 
-// // edit
-// router.get('/:slug/edit', itineraryController.editForm)
+// retrieve itinerary
+router.get('/view/:id', itinerariesController.getItinerary)
 
-// // update
-// router.patch('/:slug', itineraryController.update)
+// update
+router.patch('/:id', itinerariesController.updateItinerary)
 
 // // delete
-// router.delete('/:slug', itineraryController.delete)
+router.delete('/:id', itinerariesController.deleteItinerary)
 
 
 

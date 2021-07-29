@@ -35,9 +35,8 @@ module.exports = {
 
     if (!authToken) {
       next();
-      return;
     }
 
-    return res.json();
+    return;
   },
 };

@@ -4,8 +4,10 @@ const jwt = require("jsonwebtoken");
 const _ = require("lodash");
 
 const { BucketlistModel } = require("../models/bucketlist_model");
+
 const {
   bucketlistValidator,
+  deleteBucketlistValidator,
 } = require("../validations/bucketlist_validations");
 
 module.exports = {
@@ -20,12 +22,16 @@ module.exports = {
       return res.json(validationResult.error.details[0].message);
     }
 
+    const validatedParams = validationResult.value;
+    console.log(validatedParams);
+
     // make sure that itinerary is not already on bucketlist
     let bucketlistItem = null;
 
     try {
-      bucketlistItem = await BucketlistModel.find({
-        _id: req.params.bucketlistid,
+      bucketlistItem = await BucketlistModel.findOne({
+        user: validatedParams.userID,
+        itineraries: validatedParams.itinerariesID,
       });
     } catch (err) {
       res.statusCode = 500;
@@ -34,7 +40,26 @@ module.exports = {
 
     if (bucketlistItem) {
       res.statusCode = 500;
-      return res.json(`itineray already on bucketlist`);
+      return res.json(`itinerary already on bucketlist`);
+    }
+
+    let addBucketlistResponse = null;
+
+    try {
+      addBucketlistResponse = await BucketlistModel.create({
+        been_there: validatedParams.been_there,
+        user: validatedParams.userID,
+        itineraries: validatedParams.itinerariesID,
+      });
+    } catch (err) {
+      res.statusCode = 500;
+      console.log(err);
+      return res.json(err);
+    }
+
+    if (!addBucketlistResponse) {
+      res.statusCode = 500;
+      return res.json(`Error adding item to bucketlist!`);
     }
 
     res.statusCode = 204;
@@ -53,23 +78,16 @@ module.exports = {
 
     const validatedParams = validationResult.value;
 
-    // check for value of been_there
-    let beenThereToggler = false;
-    console.log(beenThereToggler);
-
-    if (!validatedParams.been_there) {
-      beenThereToggler = true;
-    }
-
     let updateResponse = null;
 
     try {
       updateResponse = await BucketlistModel.findOneAndUpdate(
         {
-          itinerary_id: validatedParams.itinerary_id,
+          user: validatedParams.userID,
+          itineraries: validatedParams.itinerariesID,
         },
         {
-          been_there: beenThereToggler,
+          been_there: validatedParams.been_there,
         }
       );
     } catch (err) {
@@ -83,13 +101,13 @@ module.exports = {
     }
 
     res.statusCode = 204;
-    return res.json();
+    return res.json(updateResponse);
   },
 
-  delete: (req, res) => {
+  delete: async (req, res) => {
     // remove itinerary from bucketlist
 
-    const validationResult = bucketlistValidator.validate(req.body);
+    const validationResult = deleteBucketlistValidator.validate(req.body);
 
     if (validationResult.error) {
       res.statusCode = 400;
@@ -102,7 +120,8 @@ module.exports = {
 
     try {
       removeResponse = await BucketlistModel.deleteOne({
-        user_id: validatedParams.user_id,
+        user: validatedParams.userID,
+        itineraries: validatedParams.itinerariesID,
       });
     } catch (err) {
       res.statusCode = 500;
@@ -113,9 +132,32 @@ module.exports = {
       res.statusCode = 500;
       return res.json(`Error encountered when deleting`);
     }
+
+    return res.json();
   },
 
-  show: (req, res) => {
-    // allow users to view the bucketlist of a particular user
+  show: async (req, res) => {
+    if (!mongoose.Types.ObjectId.isValid(req.params.userID)) {
+      res.statusCode = 400;
+      return res.json(`error!`);
+    }
+
+    await BucketlistModel.find({
+      user: req.params.userID,
+    })
+      .populate("itineraries")
+      .populate("user")
+      .then((response) => {
+        if (!response) {
+          res.statusCode = 500;
+          return res.json(`Oops! Server error`);
+        }
+        res.statusCode = 200;
+        return res.json(response);
+      })
+      .catch((err) => {
+        res.statusCode = 500;
+        return res.json(err);
+      });
   },
 };
