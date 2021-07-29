@@ -28,7 +28,7 @@ module.exports = {
             safety: cityData.data.attributes.safety[cityData.data.attributes.name],
             rating: cityData.data.attributes.average_rating,
             knownFor: cityData.included.filter(x => x.type === 'known_for'),
-            image:cityData.included.find(x => x.type === 'photo').attributes.image.large
+            image:cityData.included.find(x => x.id === cityData.data.relationships.photos.data[0].id).attributes.image.large
             })
             
             return `Location data created`

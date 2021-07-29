@@ -40,7 +40,7 @@ module.exports = {
        
         let totalCount = await countItineraries(res, filters)
         let itineraries = await getItineraries(res, filters, perPage, page)
-    
+        console.log(itineraries)
         return res.json({
             itineraries: itineraries,
             totalCount: totalCount
@@ -101,32 +101,38 @@ module.exports = {
 
 
     getItinerary: async (req, res) => {
-
-        // validate that the itineraryID is valid 
-        idValidator(res, req.params.id)
+        try{
+            // validate that the itineraryID is valid 
+            idValidator(res, req.params.id)
     
+        }
+        catch(err){
+            console.log(err)
+        }
+      
         let itinerary = await getItinerary(res, req.params.id)
+        
         return res.json(itinerary)
     },
 
 
     createItinerary: async (req, res) => {
         // validation
-        const validationResult = itinerariesValidator.validate(req.body)
-        if (validationResult.error) {
-            res.statusCode = 400
-            return res.json(validationResult.error)
-        }
+        // const validationResult = itinerariesValidator.validate(req.body)
+        // if (validationResult.error) {
+        //     res.statusCode = 400
+        //     console.log("error")
+        //     return res.json(validationResult.error)
+        // }
 
-        const validatedParams = validationResult.value
+        const validatedParams = req.body
 
         let createParams = {
-            name: validatedParams.name,
+            name: "Trip Name",
             destination: validatedParams.destination,
-            season: validatedParams.season,
-            trip_duration: validatedParams.trip_duration,
-            itinerary: validatedParams.itinerary,
-            creator: "60e91dc46bddd93fecb25c6d",
+            season: "Summer",
+            trip_duration: 5,
+            creator: validatedParams.creator,
             published: false
         }
 
@@ -134,8 +140,9 @@ module.exports = {
         // create itinerary
     
         let created = await createItinerary(res, createParams)
-        
-        return res.json(created)
+
+        console.log(req.body)
+        return res.json(created._id)
    
 
     },

@@ -18,7 +18,10 @@ module.exports = {
         let cityData = await checkCity(req.params.slug)
         
         if (cityData) {
-            return res.json(cityData);
+          return res.json({
+            status: 200,
+            data: cityData,
+          })
             
         } else {
           try {
@@ -43,20 +46,21 @@ module.exports = {
               console.log(err)
               return
           }
+          console.log(cityData)
           let cleanData =  {
-            slug: cityData.data.attributes.slug,
-            destinationType: cityData.data.attributes.destination_type,
-            name: cityData.data.attributes.short_name,
-            longName: cityData.data.attributes.long_name,
-            population: cityData.data.attributes.population,
-            latlong: `${cityData.data.attributes.latitude},${cityData.data.attributes.longitude}`,
-            lat: cityData.data.attributes.latitude,
-            long: cityData.data.attributes.longitude,
-            budget: cityData.data.attributes.budget[cityData.data.attributes.name],
-            safety: cityData.data.attributes.safety[cityData.data.attributes.name],
-            rating: cityData.data.attributes.average_rating,
-            knownFor: cityData.included.filter(x => x.type === 'known_for'),
-            image:cityData.included.find(x => x.type === 'photo').attributes.image.large
+            slug: cityData.data.data.attributes.slug,
+            destinationType: cityData.data.data.attributes.destination_type,
+            name: cityData.data.data.attributes.short_name,
+            longName: cityData.data.data.attributes.long_name,
+            population: cityData.data.data.attributes.population,
+            latlong: `${cityData.data.data.attributes.latitude},${cityData.data.data.attributes.longitude}`,
+            lat: cityData.data.data.attributes.latitude,
+            long: cityData.data.data.attributes.longitude,
+            budget: cityData.data.data.attributes.budget[cityData.data.data.attributes.name],
+            safety: cityData.data.data.attributes.safety[cityData.data.data.attributes.name],
+            rating: cityData.data.data.attributes.average_rating,
+            knownFor: cityData.data.included.filter(x => x.type === 'known_for'),
+            image:cityData.data.included.find(x => x.id === cityData.data.data.relationships.photos.data[0].id).attributes.image.large
           }
           console.log('written to db')
           return res.json({
@@ -79,10 +83,21 @@ module.exports = {
             data: err.message
           })
         }
-       
-        let cleanData = await Promise.all(cities.data.data.map(item => ({"slug": item.attributes.slug,
-        "name": item.attributes.name, "destination_type": item.attributes.destination_type
-    })))
+        
+        let cleanData = await Promise.all(cities.data.data.map(item => {
+          let destinationType
+          if(item.attributes.destination_type === "City"){
+            destinationType = 'Cities'
+          } else if (item.attributes.destination_type === "Country") {
+            destinationType = 'Countries'
+          }
+          return ({
+            "slug": item.attributes.slug,
+            "name": item.attributes.name, 
+            "destination_type": destinationType
+          })
+        }))
+        
         res.json({
           status: 200,
           data: cleanData,

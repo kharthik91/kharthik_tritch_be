@@ -30,8 +30,9 @@ module.exports = {
 // Search for attractions from google places
 
     placeSearch: async(location) => {
-        
+        console.log("searching places")
         try {
+            console.log("searching places api")
             let results = await axios({
                 method: 'GET',
                 url: `https://maps.googleapis.com/maps/api/place/nearbysearch/json?key=${process.env.GOOGLEAPI_KEY}&location=${location}&radius=45000`,
