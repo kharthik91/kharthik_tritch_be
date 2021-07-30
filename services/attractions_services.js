@@ -35,7 +35,7 @@ module.exports = {
             console.log("searching places api")
             let results = await axios({
                 method: 'GET',
-                url: `https://maps.googleapis.com/maps/api/place/nearbysearch/json?key=${process.env.GOOGLEAPI_KEY}&location=${location}&radius=45000`,
+                url: `https://maps.googleapis.com/maps/api/place/nearbysearch/json?key=${process.env.GOOGLEAPI_KEY}&location=${location}&radius=45000&type=tourist_attraction`,
             })
             // console.log(results.data)
             return results.data.results
@@ -48,19 +48,24 @@ module.exports = {
  
 // Retrieve attraction photos from google places
     placePhoto: async(photoRef) => {
-        
-        try {
-            let photo = await axios({
-                method: 'GET',
-                url: `https://maps.googleapis.com/maps/api/place/photo?key=${process.env.GOOGLEAPI_KEY}&photoreference=${photoRef}&maxwidth=600`,
-            })
+        if (photoRef === "skip") {
+            return "https://i-concept.com.sg/wp-content/uploads/2020/01/placeholder.png"
+        } else {
             
-            return photo.request._redirectable._options.href
-            
-        } catch (err) {
-            res.statusCode = 500
-            return `Unable to retrieve photo`
+            try {
+                let photo = await axios({
+                    method: 'GET',
+                    url: `https://maps.googleapis.com/maps/api/place/photo?key=${process.env.GOOGLEAPI_KEY}&photoreference=${photoRef}&maxwidth=600`,
+                })
+                
+                return photo.request._redirectable._options.href
+                
+            } catch (err) {
+                
+                return 
+            }
         }
+       
     },
 
     

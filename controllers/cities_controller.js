@@ -60,7 +60,7 @@ module.exports = {
             safety: cityData.data.data.attributes.safety[cityData.data.data.attributes.name],
             rating: cityData.data.data.attributes.average_rating,
             knownFor: cityData.data.included.filter(x => x.type === 'known_for'),
-            image:cityData.data.included.find(x => x.id === cityData.data.data.relationships.photos.data[0].id).attributes.image.large
+            image:cityData.data.included.find(x => x.id === cityData.data.included[0].relationships.featured_photo.data.id).attributes.image.large
           }
           console.log('written to db')
           return res.json({
