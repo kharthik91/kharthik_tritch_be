@@ -86,8 +86,8 @@ module.exports = {
     // if (commentsValidatorResult.error) {
     //   res.statusCode = 400;
     //   return res.json(commentsValidatorResult.error);
-    }
-    const validatedParams = commentsValidator.validate(req.body);
+    // }
+    const validatedParams = req.body
 
     let cmt = null;
 
