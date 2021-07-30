@@ -45,7 +45,7 @@ module.exports = {
                         name: item.name,
                         photoReference: item.photos[0].photo_reference,
                         rating: item.rating,
-                        location: item.location
+                        location: item.geometry.location
                     })
                 } 
                 else{
@@ -53,7 +53,7 @@ module.exports = {
                         name: item.name,
                         photoReference: "skip",
                         rating: item.rating,
-                        location: item.location
+                        location: item.geometry.location
                     })
                 }
               
