@@ -19,6 +19,7 @@ const itinerariesSchema = new mongoose.Schema ({
             image:{ type: String },
         },
     }],
+    image:{ type: String },
     creator: [{ type: Schema.Types.ObjectId, ref: UserModel}],
     editors: [{ type: Schema.Types.ObjectId, ref: UserModel}],
     published: { type: Boolean, default: false }
