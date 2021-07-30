@@ -343,7 +343,7 @@ module.exports = {
 
     // ensuring that user exists
     let verifiedUser = null;
-
+    console.log(req.params)
     try {
       verifiedUser = await UserModel.findOne({ _id: req.params.userID });
     } catch (err) {
