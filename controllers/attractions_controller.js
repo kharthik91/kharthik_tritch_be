@@ -36,15 +36,25 @@ module.exports = {
             }
 
             // Take raw attraction data and extract necessary data and push to attractions array
-         console.log(rawAttractions[0].photos[0].photo_reference)  
+      
             await Promise.all(rawAttractions.map( (item) => {
+                console.log(item)
                 // Retrieve photo
-   
-                attractions.push({
-                    name: item.name,
-                    photoReference: item.photos[0].photo_reference,
-                    rating: item.rating
-                })
+                if(item.photos){
+                    attractions.push({
+                        name: item.name,
+                        photoReference: item.photos[0].photo_reference,
+                        rating: item.rating
+                    })
+                } 
+                else{
+                    attractions.push({
+                        name: item.name,
+                        photoReference: "skip",
+                        rating: item.rating
+                    })
+                }
+              
             }))
             
            
@@ -52,6 +62,7 @@ module.exports = {
             const photoRef = attractions.map(attraction => attraction.photoReference)
             
             const placedPhotos = await Promise.all(photoRef.map(reference => placePhoto(reference)))
+            console.log(placedPhotos)
 
             attractions.map((item, index) => {
                 item.photoUrl = placedPhotos[index]
@@ -68,7 +79,7 @@ module.exports = {
                 console.log(err)
                 return
             }
-            console.log(attractions)
+            // console.log(attractions)
             return res.json(attractions);
 
         }
