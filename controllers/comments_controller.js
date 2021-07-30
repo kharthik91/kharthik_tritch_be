@@ -7,12 +7,12 @@ const { commentsValidator } = require("../validations/comments_validation");
 module.exports = {
   //show comments under itineray
   showitinerarycomments: (req, res) => {
-    if (!mongoose.Types.ObjectId.isValid(req.params.itineraries)) {
-      res.statusCode = 400;
-      return res.json();
-    }
-
-    CommentsModel.find({ itineraries: req.params.itineraries })
+    // if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    //   res.statusCode = 400;
+    //   return res.json();
+    // }
+    console.log(req.params.id)
+    CommentsModel.find({ itineraries: req.params.id })
       .populate("itineraries")
       .populate("user")
       .then((response) => {
@@ -57,18 +57,18 @@ module.exports = {
   // create comment
   create: async (req, res) => {
     //validation
-    const commentsValidatorResult = commentsValidator.validate(req.body);
-    if (commentsValidatorResult.error) {
-      res.statusCode = 400;
-      return res.json(commentsValidatorResult.error);
-    }
+    // const commentsValidatorResult = commentsValidator.validate(req.body);
+    // if (commentsValidatorResult.error) {
+    //   res.statusCode = 400;
+    //   return res.json(commentsValidatorResult.error);
+    // }
 
     let cmt = null;
     try {
       cmt = await CommentsModel.create({
         comments: req.body.comments,
         user: req.params.user,
-        itineraries: req.params.itineraries,
+        itineraries: req.params.id,
       });
     } catch (err) {
       console.log(err);
@@ -82,12 +82,12 @@ module.exports = {
   // update comment
   update: async (req, res) => {
     //validation
-    const commentsValidatorResult = commentsValidator.validate(req.body);
-    if (commentsValidatorResult.error) {
-      res.statusCode = 400;
-      return res.json(commentsValidatorResult.error);
-    }
-    const validatedParams = commentsValidatorResult.value;
+    // const commentsValidatorResult = commentsValidator.validate(req.body);
+    // if (commentsValidatorResult.error) {
+    //   res.statusCode = 400;
+    //   return res.json(commentsValidatorResult.error);
+    // }
+    const validatedParams = req.body
 
     let cmt = null;
 

@@ -5,7 +5,7 @@ const { authenticated } = require("../middlewares/user_auth");
 
 //shows iternay comment
 router.get(
-  "/itnerary/:itineraries",
+  "/itinerary/:id",
   authenticated,
   commentsController.showitinerarycomments
 );
@@ -15,7 +15,7 @@ router.get("/:user", authenticated, commentsController.showusercomments);
 
 //create route
 router.post(
-  "/:user/itinerary/:itineraries/new",
+  "/:user/itinerary/:id/new",
   authenticated,
   commentsController.create
 );
