@@ -44,14 +44,16 @@ module.exports = {
                     attractions.push({
                         name: item.name,
                         photoReference: item.photos[0].photo_reference,
-                        rating: item.rating
+                        rating: item.rating,
+                        location: item.geometry.location
                     })
                 } 
                 else{
                     attractions.push({
                         name: item.name,
                         photoReference: "skip",
-                        rating: item.rating
+                        rating: item.rating,
+                        location: item.geometry.location
                     })
                 }
               
