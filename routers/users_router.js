@@ -19,7 +19,7 @@ router.patch(
 
 router.get("/logout", authenticated, userController.logout);
 
-router.get("/show/all", userController.showAll);
+// router.get("/show/all", userController.showAll);
 
 router.get("/show/:userID", authenticated, userController.showOne);
 
