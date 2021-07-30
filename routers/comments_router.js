@@ -15,7 +15,7 @@ router.get("/:user", authenticated, commentsController.showusercomments);
 
 //create route
 router.post(
-  "/:user/itinerary/:itineraries/new",
+  "/:user/itinerary/:id/new",
   authenticated,
   commentsController.create
 );

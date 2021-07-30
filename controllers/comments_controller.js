@@ -11,7 +11,7 @@ module.exports = {
     //   res.statusCode = 400;
     //   return res.json();
     // }
-
+    console.log(req.params.id)
     CommentsModel.find({ itineraries: req.params.id })
       .populate("itineraries")
       .populate("user")
@@ -68,7 +68,7 @@ module.exports = {
       cmt = await CommentsModel.create({
         comments: req.body.comments,
         user: req.params.user,
-        itineraries: req.params.itineraries,
+        itineraries: req.params.id,
       });
     } catch (err) {
       console.log(err);
