@@ -35,9 +35,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ---- ROUTES ---- //
-app.get("/", (req, res) => {
-  res.send(`Welcome to Tritch`);
-});
+
 app.use("/api/v1/itineraries", itinerariesRouter);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/comments", commentsRouter);
@@ -45,6 +43,21 @@ app.use("/api/v1/bucketlist", bucketlistRouter);
 app.use("/api/v1/following", followRouter);
 app.use("/api/v1/attractions", attractionsRouter);
 app.use("/api/v1/cities", citiesRouter);
+
+app.get("/", (req, res) => {
+  res.send(`Welcome to Tritch`);
+});
+
+if (process.env.NODE_ENV === "production") {
+  // Express will serve up production assets
+  // like our main.js file, or main.css file
+  app.use(express.static("client/build"));
+
+  const path = require("path");
+  app.get("*", (req, res) => {
+    res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
+  });
+}
 
 mongoose
   .connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
