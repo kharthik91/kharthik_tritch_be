@@ -6,48 +6,69 @@ const router = express.Router();
 
 module.exports = {
   //show comments under user
-  show: (req, res) => {
+  show: async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(req.params.user)) {
       res.statusCode = 400;
-      console.log();
+      
       return res.json();
     }
-
-    FollowModel.find({ following: req.params.user })
+    
+    let followers
+    let following
+    let followersData
+    let followingData
+    try{
+      followersData = await FollowModel.find({ following: req.params.user })
       .populate("user")
-      .then((response) => {
-        if (!response) {
-          res.statusCode = 404;
+    }
+    catch(err) {
+      res.statusCode = 404;
           return res.json();
-        }
-
-        return res.json(response);
+    }
+      
+   try{
+     followingData = await FollowModel.find({ user: req.params.user })
+     .populate("user")
+   }
+   catch (err) {
+    res.statusCode = 404;
+    return res.json();
+   }
+      
+      if(followingData){
+        following = followingData
+      }
+      if(followersData){
+        followers = followersData
+      }
+      
+      console.log({
+        followers: followers,
+        following: following
       })
-      .catch((err) => {
-        console.log(err);
-        res.statusCode = 500;
-        return res.json(err);
-      });
+      return res.json({
+        followers: followers,
+        following: following
+      })
+    
   },
 
   // follow someone
   create: async (req, res) => {
     //validation
-    const followValidatorResult = followValidator.validate(req.body);
-    if (followValidatorResult.error) {
-      res.statusCode = 400;
-      return res.json(followValidatorResult.error);
-    }
+    // const followValidatorResult = followValidator.validate(req.params);
+    // if (followValidatorResult.error) {
+    //   res.statusCode = 400;
+    //   return res.json(followValidatorResult.error);
+    // }
     
     if(req.body.following === req.params.user){
+      
       res.statusCode = 400;
       return res.json("You cannot follow yourself");
     }
-
-    let flw = null;
-    if (req.body.follwing)
     try {
-      flw = await FollowModel.create({
+      await FollowModel.create({
         following: req.body.following,
         user: req.params.user,
       });
@@ -55,7 +76,7 @@ module.exports = {
       console.log(err);
       return res.json();
     }
-    console.log(req.body);
+    console.log("i did it");
     res.statusCode = 200;
     return res.json();
   },
@@ -68,7 +89,7 @@ module.exports = {
 
     console.log(req.params.user, req.body);
     try {
-      flw = await FollowModel.find({
+      await FollowModel.findOneAndDelete({
         user: req.params.user,
         following: req.body.following,
       });
@@ -76,20 +97,7 @@ module.exports = {
       res.statusCode = 500;
       return res.json(err);
     }
-    if (!flw) {
-      res.statusCode = 404;
-      return res.json();
-    }
 
-    console.log(flw);
-    try {
-      await FollowModel.deleteOne({ _id: flw[0]._id });
-    } catch (err) {
-      console.log(err);
-      res.statusCode = 500;
-      return res.json(err);
-    }
-
-    return res.json();
+    return res.json("deleted");
   },
 };
