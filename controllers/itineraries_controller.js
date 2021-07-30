@@ -127,12 +127,14 @@ module.exports = {
 
         const validatedParams = req.body
 
+
         let createParams = {
             name: "Trip Name",
             destination: validatedParams.destination,
             season: "Summer",
             trip_duration: 5,
             creator: validatedParams.creator,
+            image: validatedParams.image,
             published: false
         }
 
