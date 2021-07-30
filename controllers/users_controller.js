@@ -347,7 +347,7 @@ module.exports = {
     try {
       verifiedUser = await UserModel.findOne({ _id: req.params.userID });
     } catch (err) {
-      res.statusCode = 503;
+      res.statusCode = 500;
       return res.json(err);
     }
 

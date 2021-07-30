@@ -57,11 +57,11 @@ module.exports = {
   // create comment
   create: async (req, res) => {
     //validation
-    const commentsValidatorResult = commentsValidator.validate(req.body);
-    if (commentsValidatorResult.error) {
-      res.statusCode = 400;
-      return res.json(commentsValidatorResult.error);
-    }
+    // const commentsValidatorResult = commentsValidator.validate(req.body);
+    // if (commentsValidatorResult.error) {
+    //   res.statusCode = 400;
+    //   return res.json(commentsValidatorResult.error);
+    // }
 
     let cmt = null;
     try {
@@ -82,12 +82,12 @@ module.exports = {
   // update comment
   update: async (req, res) => {
     //validation
-    const commentsValidatorResult = commentsValidator.validate(req.body);
-    if (commentsValidatorResult.error) {
-      res.statusCode = 400;
-      return res.json(commentsValidatorResult.error);
+    // const commentsValidatorResult = commentsValidator.validate(req.body);
+    // if (commentsValidatorResult.error) {
+    //   res.statusCode = 400;
+    //   return res.json(commentsValidatorResult.error);
     }
-    const validatedParams = commentsValidatorResult.value;
+    const validatedParams = commentsValidator.validate(req.body);
 
     let cmt = null;
 
