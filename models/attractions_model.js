@@ -10,6 +10,10 @@ const attractionsSchema = new mongoose.Schema ({
         photoReference: { type: String },
         photoUrl: { type: String },
         rating: { type: Number},
+        location:{
+          lat:{ type: Number},
+          lng:{ type: Number}
+        }
     }],
   },{timestamps: true})
 
