@@ -5,7 +5,7 @@ const { authenticated } = require("../middlewares/user_auth");
 
 //shows iternay comment
 router.get(
-  "/itnerary/:itineraries",
+  "/itinerary/:id",
   authenticated,
   commentsController.showitinerarycomments
 );

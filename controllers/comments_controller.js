@@ -7,12 +7,12 @@ const { commentsValidator } = require("../validations/comments_validation");
 module.exports = {
   //show comments under itineray
   showitinerarycomments: (req, res) => {
-    if (!mongoose.Types.ObjectId.isValid(req.params.itineraries)) {
-      res.statusCode = 400;
-      return res.json();
-    }
+    // if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    //   res.statusCode = 400;
+    //   return res.json();
+    // }
 
-    CommentsModel.find({ itineraries: req.params.itineraries })
+    CommentsModel.find({ itineraries: req.params.id })
       .populate("itineraries")
       .populate("user")
       .then((response) => {
