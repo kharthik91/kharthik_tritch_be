@@ -12,6 +12,7 @@ const bucketlistRouter = require("./routers/bucketlist_router");
 const followRouter = require("./routers/follow_router");
 const attractionsRouter = require("./routers/attractions_router");
 const citiesRouter = require("./routers/cities_router");
+//const citiesRouter = require("./routers/cities_router");
 
 const app = express();
 const port = process.env.PORT || 3000;
